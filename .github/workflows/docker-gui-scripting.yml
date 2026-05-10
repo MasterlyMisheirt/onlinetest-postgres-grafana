@@ -24,7 +24,7 @@ jobs:
     - name: Build testrunner
       run: docker build --load  --tag sitespeedio/testrunner:local-action -f ./testrunner/Dockerfile testrunner
     - name: Pull sitespeed.io
-      run: docker pull sitespeedio/sitespeed.io:39
+      run: docker pull sitespeedio/sitespeed.io:40
     - name: Prepare env
       run: cp .env.example .env
     - name: Start dependencies
@@ -45,7 +45,7 @@ jobs:
         git clone https://github.com/sitespeedio/sitespeed.io.git
         cd sitespeed.io
         npm install
-        bin/sitespeed.js ../test/scripts/addscriptingtest.mjs --multi -n 1 --headless -b firefox
+        bin/sitespeed.js ../test/scripts/addscriptingtest.mjs --multi -n 1 --headless
     - name: Display Server log
       if: failure() || success()
       run: docker logs onlinetest-sitespeed.io-server-1
