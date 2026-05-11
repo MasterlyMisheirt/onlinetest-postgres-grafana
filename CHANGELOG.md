@@ -2,6 +2,14 @@
 
 This changelog combines the server and testrunner changes. The changelog do [semantic versioning](https://semver.org).
 
+## 3.0.1 - 2026-05-11
+
+### Changed
+* Show the configured `allowedDomain` regex in the URL input placeholder so users can see which URLs are accepted [#225](https://github.com/sitespeedio/onlinetest/pull/225).
+
+### Fixed
+* Fix broken status polling and missing fonts on the running page [#226](https://github.com/sitespeedio/onlinetest/pull/226).
+
 ## 3.0.0 - 2026-05-11
 
 The 3.0.0 release replaces the Bulma-based GUI with a hand-written design system and ships two configurable themes. The API and database schema are unchanged.
