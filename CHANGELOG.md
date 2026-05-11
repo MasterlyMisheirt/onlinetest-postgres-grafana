@@ -2,17 +2,20 @@
 
 This changelog combines the server and testrunner changes. The changelog do [semantic versioning](https://semver.org).
 
+## 3.0.3 - 2026-05-11
+
+### Fixed
+* Fix spinning /result page when a queued test is in active state [#228](https://github.com/sitespeedio/onlinetest/pull/228).
+
 ## 3.0.2 - 2026-05-11
 
-### Changed
+### Fixed
 * Shorten the URL input placeholder so the allowed-domain regex hint fits on narrower viewports [#227](https://github.com/sitespeedio/onlinetest/pull/227).
 
 ## 3.0.1 - 2026-05-11
 
-### Changed
+###  Fixed
 * Show the configured `allowedDomain` regex in the URL input placeholder so users can see which URLs are accepted [#225](https://github.com/sitespeedio/onlinetest/pull/225).
-
-### Fixed
 * Fix broken status polling and missing fonts on the running page [#226](https://github.com/sitespeedio/onlinetest/pull/226).
 
 ## 3.0.0 - 2026-05-11
