@@ -31,11 +31,24 @@ export function setupStatic(app) {
   );
 
   app.use(
+    '/fonts',
+    express.static(getBaseFilePath(path.join('public', 'fonts')), {
+      maxAge: '366 days'
+    })
+  );
+
+  app.use(
     '/compare',
     express.static(getBaseFilePath(path.join('public', 'compare')), {
       maxAge: '10 minutes'
     })
   );
+
+  app.get('/sitespeed-help.json', (request, response) => {
+    response.sendFile(
+      getBaseFilePath(path.join('public', 'sitespeed-help.json'))
+    );
+  });
 
   if (nconf.get('html:extras:path')) {
     logger.info(
