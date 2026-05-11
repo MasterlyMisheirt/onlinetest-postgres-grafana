@@ -2,9 +2,32 @@
 
 This changelog combines the server and testrunner changes. The changelog do [semantic versioning](https://semver.org).
 
-## 2.1.0 - UNRELEASED
+## 3.0.0 - UNRELEASED
+
+The 3.0.0 release replaces the Bulma-based GUI with a hand-written design system and ships two configurable themes. The API and database schema are unchanged.
+
+### Upgrading from 2.X to 3.0
+* If you have custom CSS in `html.css.override` that targets Bulma classes (e.g. `.button.is-primary`, `.notification.is-success`), it will need to be rewritten — Bulma is no longer loaded.
+* Pick a theme via `html.theme` in `server.yaml`: `console` (engineering-grade light/dark dashboard, default) or `memphis` (playful pastel sticker design). Existing setups default to `console`.
+
 ### Added
-* Collect metrics from the server and make it availible for Promethues [#213](https://github.com/sitespeedio/onlinetest/pull/213).
+* Collect metrics from the server and make it available for Prometheus [#213](https://github.com/sitespeedio/onlinetest/pull/213).
+* New API endpoint to retrieve the full Browsertime JSON for a completed test via `GET /api/result/:id` [#217](https://github.com/sitespeedio/onlinetest/pull/217).
+* Two configurable GUI themes: `console` (default) and `memphis`, selected via `html.theme` in server.yaml [#224](https://github.com/sitespeedio/onlinetest/pull/224).
+* Lazy-load the Ace editor so it only fetches when the Scripting tab is opened; first paint of the start page drops by roughly 700 KB [#224](https://github.com/sitespeedio/onlinetest/pull/224).
+* Searchable picker of all sitespeed.io CLI flags in the Command line tab [#224](https://github.com/sitespeedio/onlinetest/pull/224).
+* Significant accessibility improvements: skip links, real labels, ARIA tablist with arrow-key navigation, modal focus trap, role attributes, aria-current on nav, aria-busy/aria-live on the running page, ≥44 px touch targets, prefers-reduced-motion, `/`-to-focus and ⌘↵-to-submit shortcuts [#224](https://github.com/sitespeedio/onlinetest/pull/224).
+* Added step-security/harden-runner to all GitHub Actions workflows [#222](https://github.com/sitespeedio/onlinetest/pull/222).
+
+### Changed
+* Replaced the Bulma CSS framework with a hand-written design system — drops ~250 KB of vendor CSS. Custom CSS overrides targeting Bulma classes will need to be rewritten [#224](https://github.com/sitespeedio/onlinetest/pull/224).
+* Default sitespeed.io Docker image bumped from 39 to 40 in `.env.example`.
+* Pinned GitHub Actions to specific commit SHAs for supply-chain security [#220](https://github.com/sitespeedio/onlinetest/pull/220).
+* Switched the API Docker workflow's harden-runner egress policy to `block` [#223](https://github.com/sitespeedio/onlinetest/pull/223).
+
+### Fixed
+* Smarter URL matching in scripting validation: now handles both single and double quotes, and whitespace inside `commands.measure.start(...)` / `commands.navigate(...)` calls [#211](https://github.com/sitespeedio/onlinetest/pull/211).
+* Better error handling in the API result endpoint [#218](https://github.com/sitespeedio/onlinetest/pull/218).
 
 ## 2.0.0 - 2026-01-22
 
