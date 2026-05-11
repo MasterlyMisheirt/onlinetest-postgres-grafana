@@ -2,7 +2,7 @@
 
 This changelog combines the server and testrunner changes. The changelog do [semantic versioning](https://semver.org).
 
-## 3.0.0 - UNRELEASED
+## 3.0.0 - 2026-05-11
 
 The 3.0.0 release replaces the Bulma-based GUI with a hand-written design system and ships two configurable themes. The API and database schema are unchanged.
 
