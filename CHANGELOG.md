@@ -2,6 +2,20 @@
 
 This changelog combines the server and testrunner changes. The changelog do [semantic versioning](https://semver.org).
 
+## 3.3.0 - 2026-05-12
+
+### Added
+* Refreshed the vendored compare bundle with a sharing pass, accurate transfer-size diffs and style recalculation visibility:
+  * **Share action** in the result header. When both HARs were fetched from URLs it copies a share link the recipient can open to see the same comparison; otherwise it downloads a single JSON bundle with both HARs embedded, which the start page accepts via drop or paste.
+  * **Request diff now reports transfer size**, not the HAR spec's `bodySize` (which is decoded body length and often `-1`/unknown). Prefers `_transferSize` (real bytes over the wire when Chrome / sitespeed.io / WPT recorded it), falls back to `bodySize > 0`, then `content.size > 0`. The byte deltas no longer under-report compressed payloads. Heading now reads "Request/response transfer size difference".
+  * **Style recalc rows** in the page-x-ray "Render blocking" section, sourced from the new pagexray 4.5.0 field — how many elements the browser re-styled and how long it spent before FCP and LCP. A real lever for regression hunting that previously didn't show up anywhere.
+  * **Render blocking section polish**: blocking-count labels now say "...blocking requests" so the unit is explicit (they used to read like ambiguous measurements), and Style recalc rows render before the request counts so the actual work reads first.
+
+### Fixed
+* Filmstrip and Visual Progress thumbnails no longer 404 — frame timestamps are now derived from the same `_visualMetrics.VisualProgress` change points sitespeed.io's own report uses, matching the cadence sitespeed.io actually wrote to disk.
+* Millisecond timings in the page-x-ray diff are rounded to whole ms — the new recalc duration field reports sub-ms precision ("17.099 ms") that's noise at this scale.
+* "Switch HAR" and run-dropdown changes preserve the previous source URLs / config / stripVersion choice, so the Share UI doesn't downgrade from "Copy share link" to "Download bundle" on every toggle.
+
 ## 3.2.0 - 2026-05-12
 
 ### Added
