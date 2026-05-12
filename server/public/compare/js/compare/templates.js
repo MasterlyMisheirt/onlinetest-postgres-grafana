@@ -220,15 +220,50 @@ function pageXrayTemplate(d) {
 
   if (p1.renderBlocking && p2.renderBlocking) {
     html += section('Render blocking', 'blocking');
-    html += '<tr><td class="tabletext">Render blocking</td>' +
+
+    // Style recalculation before FCP / LCP. Sitespeed.io / browsertime
+    // captures how many elements the browser re-styled and how long it
+    // took on its way to each paint milestone — both are "lower is
+    // better", so the existing diff colouring applies. Rendered before
+    // the blocking-request counts so the eye sees the work first and
+    // the per-request counts as context. Guarded so a plain Chrome HAR
+    // (no recalculateStyle) doesn't render four empty rows.
+    const rs1 = p1.renderBlocking.recalculateStyle;
+    const rs2 = p2.renderBlocking.recalculateStyle;
+    if (rs1 && rs2) {
+      function recalcRow(label, a, b, formatter) {
+        return '<tr><td class="tabletext">' + h(label) + '</td>' +
+               '<td>' + (formatter ? formatter(a) : a) + '</td>' +
+               '<td>' + (formatter ? formatter(b) : b) + '</td>' +
+               diffCell(a, b, formatter) + '</tr>';
+      }
+      if (rs1.beforeFCP && rs2.beforeFCP) {
+        html += recalcRow('Style recalc elements (FCP)',
+                          rs1.beforeFCP.elements, rs2.beforeFCP.elements);
+        html += recalcRow('Style recalc time (FCP)',
+                          rs1.beforeFCP.durationInMillis, rs2.beforeFCP.durationInMillis, formatTime);
+      }
+      if (rs1.beforeLCP && rs2.beforeLCP) {
+        html += recalcRow('Style recalc elements (LCP)',
+                          rs1.beforeLCP.elements, rs2.beforeLCP.elements);
+        html += recalcRow('Style recalc time (LCP)',
+                          rs1.beforeLCP.durationInMillis, rs2.beforeLCP.durationInMillis, formatTime);
+      }
+    }
+
+    // The three counters below are *request* counts — how many
+    // resources fall into each render-blocking class. The "requests"
+    // suffix makes that explicit so the numbers aren't mistaken for
+    // milliseconds or sizes.
+    html += '<tr><td class="tabletext">Render blocking requests</td>' +
             '<td>' + p1.renderBlocking.blocking + '</td>' +
             '<td>' + p2.renderBlocking.blocking + '</td>' +
             diffCell(p1.renderBlocking.blocking, p2.renderBlocking.blocking) + '</tr>';
-    html += '<tr><td class="tabletext">Potentially blocking</td>' +
+    html += '<tr><td class="tabletext">Potentially blocking requests</td>' +
             '<td>' + p1.renderBlocking.potentiallyBlocking + '</td>' +
             '<td>' + p2.renderBlocking.potentiallyBlocking + '</td>' +
             diffCell(p1.renderBlocking.potentiallyBlocking, p2.renderBlocking.potentiallyBlocking) + '</tr>';
-    html += '<tr><td class="tabletext">In body parser blocking</td>' +
+    html += '<tr><td class="tabletext">In body parser blocking requests</td>' +
             '<td>' + p1.renderBlocking.in_body_parser_blocking + '</td>' +
             '<td>' + p2.renderBlocking.in_body_parser_blocking + '</td>' +
             diffCell(p1.renderBlocking.in_body_parser_blocking, p2.renderBlocking.in_body_parser_blocking) + '</tr>';
@@ -644,7 +679,7 @@ function domainsTemplate(d) {
 //
 function requestDiffTemplate(d) {
   if (!d.requestDiff) return '';
-  let html = '<h3 id="requestDifffHeader">Request/response difference (larger than 1 kb)</h3>';
+  let html = '<h3 id="requestDifffHeader">Request/response transfer size difference (larger than 1 KB)</h3>';
   html += '<div id="comment-requestDiff" class="comment"></div>';
 
   if (!d.requestDiff.length) {
