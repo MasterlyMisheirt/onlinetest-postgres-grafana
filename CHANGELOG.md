@@ -2,6 +2,23 @@
 
 This changelog combines the server and testrunner changes. The changelog do [semantic versioning](https://semver.org).
 
+## 3.1.0 - 2026-05-12
+
+## Added
+* The GUI skin can now be picked via `HTML_THEME` in `.env` (`console` or `memphis`); maps to `html.theme` in `server.yaml`. Works for both local development and Docker [#233](https://github.com/sitespeedio/onlinetest/pull/233).
+* Refreshed the vendored compare bundle [#230](https://github.com/sitespeedio/onlinetest/pull/230) [#231](https://github.com/sitespeedio/onlinetest/pull/231):
+  * Filmstrip section is back — works for sitespeed.io HARs (frame URLs are derived from `_meta.screenshot` at 100 ms intervals between FirstVisualChange and LastVisualChange), with a modern two-rail layout (HAR1 above HAR2, lazy-loaded thumbnails, time captions).
+  * Visual Progress chart shows a thumbnail strip per HAR below the curve, aligned to the same time axis.
+  * Hover a waterfall row to see the full request URL in a floating tooltip; the tooltip follows whichever HAR is currently more visible as the blend slider moves.
+  * `?compare=1&har1=URL` autoload now picks page 1 for HAR2 on multi-page HARs (was silently rendering identical panels).
+  * Internals: Template7 and the FileDropJS / zlib.js / normalize.css vendored libs are gone — replaced with native template literals, native dragover/drop, native `DecompressionStream`, and a minimal inline reset. ~1 000 fewer lines of vendored JS.
+  * Classic script src URLs are now build-stamped (`?v=<buildId>`) so a deploy reaches every visitor on the next page load.
+* Memphis search badges for completed / failed tests now use the same coloured-pill treatment the Console theme already had (pastel-fill, ink border, sticker shadow) instead of plain coloured text [#233](https://github.com/sitespeedio/onlinetest/pull/233).
+
+### Fixed
+* Blank log stream on the running page after the in-memory queue lookup misses (the page would load, sit silent, then jump to the result on completion). `/api/status/:id` now falls back to deriving the queue from the DB row, the same shape the `/result/:id` fix landed for in 3.0.3 [#229](https://github.com/sitespeedio/onlinetest/pull/229).
+* `npm start --prefix server` and `npm start --prefix testrunner` couldn't find the project-root `.env` because npm switches cwd to the package directory and `dotenv/config` only looks there. Both `config.js` files now anchor dotenv to the project root explicitly; Docker is unaffected (env vars come from `docker-compose`'s `env_file`) [#232](https://github.com/sitespeedio/onlinetest/pull/232).
+
 ## 3.0.3 - 2026-05-11
 
 ### Fixed
