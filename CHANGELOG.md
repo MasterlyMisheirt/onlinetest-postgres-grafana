@@ -2,6 +2,13 @@
 
 This changelog combines the server and testrunner changes. The changelog do [semantic versioning](https://semver.org).
 
+## 3.1.1 - 2026-05-12
+
+### Fixed
+* Filmstrip and Visual Progress thumbnails no longer point at non-existent screenshots. The frame timestamps are now derived from `_visualMetrics.VisualProgress` change points — the authoritative list of frames sitespeed.io actually wrote to disk — instead of speculating a 100 ms grid that breaks on runs with a flat visual-progress stretch [#235](https://github.com/sitespeedio/onlinetest/pull/235).
+
+* Theme and admin CSS now cache-bust on each release via `?v=<server-version>` stamped on the `<link rel="stylesheet">` hrefs. Previously a patch release that only touched the theme CSS could sit in browser caches until the unrelated 30-day cache header expired [#234](https://github.com/sitespeedio/onlinetest/pull/234).
+
 ## 3.1.0 - 2026-05-12
 
 ## Added
