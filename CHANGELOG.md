@@ -2,6 +2,11 @@
 
 This changelog combines the server and testrunner changes. The changelog do [semantic versioning](https://semver.org).
 
+## 3.3.1 - 2026-05-12
+
+### Fixed
+* Filmstrip 404s in the compare view, again — the 3.3.0 pass still constructed frame URLs on a fixed 100 ms cadence inside `(FirstVisualChange, LastVisualChange)`, which broke whenever visual progress sat flat between two boundaries (the expected JPGs were never written to disk). The vendored compare bundle now reads frame timestamps straight from `_visualMetrics.VisualProgress` — one JPG per VP sample, named after that exact ms — and lets the existing 100 ms padding step forward-fill the uniform grid, so the rendered strip still reads "nothing happened for 2 s" differently from "everything changed in 50 ms" [#238](https://github.com/sitespeedio/onlinetest/pull/238).
+
 ## 3.3.0 - 2026-05-12
 
 ### Added
