@@ -2,9 +2,9 @@
 
 This changelog combines the server and testrunner changes. The changelog do [semantic versioning](https://semver.org).
 
-## Unreleased
+## 3.2.0 - 2026-05-12
 
-### Changed
+### Added
 * Refreshed the vendored compare bundle to pick up the upstream regression-spotting pass:
   * Page-x-ray table gets a Δ column (red regressions, green improvements, grey "no change") and a per-section colour scheme. A new "Only differences" chip in the column header hides rows where nothing actually moved.
   * CPU "time spent by category" and "events" disclosure rows are now proper sub-tables with their own Δ column.
