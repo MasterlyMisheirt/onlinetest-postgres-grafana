@@ -115,16 +115,16 @@ There's a regular expression that validates the domain of the URL that you want 
 
 ### Update sitespeed.io version
 By default latest major release of sitespeed.io is configured, it looks like this in the **.env** file:
-`SITESPEED_IO_CONTAINER="sitespeedio/sitespeed.io:39"`
-
-When 40 is released you just switch to:
 `SITESPEED_IO_CONTAINER="sitespeedio/sitespeed.io:40"`
 
+When 41 is released you just switch to:
+`SITESPEED_IO_CONTAINER="sitespeedio/sitespeed.io:41"`
+
 To get latest version of 39 you need to periodically pull down the version:
-```docker pull sitespeedio/sitespeed.io:39```
+```docker pull sitespeedio/sitespeed.io:40```
 
 If you want to run a specific version, you can pin the version to a specific version:
-`SITESPEED_IO_CONTAINER="sitespeedio/sitespeed.io:39.0.0"`
+`SITESPEED_IO_CONTAINER="sitespeedio/sitespeed.io:40.0.0"`
 
 #### Access the result
 Running on your own machine the result is served from localhost. If you deploy on a server you want to change that:
@@ -137,8 +137,8 @@ By default the result is served by [MinIO](https://min.io) on port 9000. If you 
 You can configure which version of the server and the testrunner you want to use. You can either use latest stable version or specify a specific tag. In the *.env* file you configure which Docker tag to use.
 
 ```
-SITESPEED_IO_SERVER_VERSION=2
-SITESPEED_IO_TESTRUNNER_VERSION=2
+SITESPEED_IO_SERVER_VERSION=3
+SITESPEED_IO_TESTRUNNER_VERSION=3
 ```
 
 ### Secure the API with a key
