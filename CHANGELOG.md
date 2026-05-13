@@ -2,6 +2,19 @@
 
 This changelog combines the server and testrunner changes. The changelog do [semantic versioning](https://semver.org).
 
+## 3.5.0 - 2026-05-13
+
+The `/admin` page becomes a real operator dashboard, and `/search/` gets opt-in auto-refresh.
+
+### Added
+* Health banner on `/admin`: Redis up/down, Postgres up/down, connected testrunners, totals for pending/running/failed jobs [#247](https://github.com/sitespeedio/onlinetest/pull/247).
+* "Currently running" table on `/admin` — every active job with URL/script, queue, runner, and elapsed time. Runs over 10 minutes are highlighted [#247](https://github.com/sitespeedio/onlinetest/pull/247).
+* "Recent failures" table on `/admin` with the error message and a one-click Retry button [#248](https://github.com/sitespeedio/onlinetest/pull/248).
+* Active and Failed counts on the queue table, plus a red "no worker" badge when a queue has pending jobs but no testrunner serving it [#246](https://github.com/sitespeedio/onlinetest/pull/246).
+* `/admin` auto-refreshes every 15 seconds. Pauses in background tabs [#249](https://github.com/sitespeedio/onlinetest/pull/249).
+* Opt-in auto-refresh toggle on `/search/`, 60 seconds. Off by default. Pauses while any test is ticked, so Compare selections aren't lost. State remembered in `localStorage` [#250](https://github.com/sitespeedio/onlinetest/pull/250).
+* `/admin` mobile layout reworked for the new tables — rows stack into name → counts → action on narrow screens [#246](https://github.com/sitespeedio/onlinetest/pull/246) [#247](https://github.com/sitespeedio/onlinetest/pull/247) [#248](https://github.com/sitespeedio/onlinetest/pull/248).
+
 ## 3.4.0 - 2026-05-13
 
 A round of server-side hardening, operator-experience work, and small UI fixes.
