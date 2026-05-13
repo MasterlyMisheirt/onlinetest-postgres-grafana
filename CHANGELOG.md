@@ -2,6 +2,21 @@
 
 This changelog combines the server and testrunner changes. The changelog do [semantic versioning](https://semver.org).
 
+## 3.7.0 - 2026-05-13
+
+More `/admin` polish — per-queue trend lines, small motion cues, and a couple of testrunner re-registration fixes.
+
+### Added
+* Per-queue 24 h sparkline on each `/admin` queue row, independently scaled so low- and high-traffic queues both show shape [#256](https://github.com/sitespeedio/onlinetest/pull/256).
+* Subtle motion on `/admin`: one-time staggered bar-chart entrance, refresh-indicator pulse, and tweened number rollups when totals change. All honour `prefers-reduced-motion` [#256](https://github.com/sitespeedio/onlinetest/pull/256).
+
+### Fixed
+* Queue defaults bumped to `removeOnComplete: 50 / removeOnFail: 100 / attempts: 2`; code-level fallbacks aligned with the yaml [#255](https://github.com/sitespeedio/onlinetest/pull/255).
+* Internal queues (`testrunners`, `result`) no longer listed on `/admin` — they had no failures, no sparkline, and an inert Empty button [#258](https://github.com/sitespeedio/onlinetest/pull/258).
+* Refresh indicator on `/admin` now sits in a fixed-width column so the version pill can't shift sideways each tick [#258](https://github.com/sitespeedio/onlinetest/pull/258).
+* Testrunner setup duplicated on restart — registration was concatenating old + new instead of deduping [#257](https://github.com/sitespeedio/onlinetest/pull/257).
+* Multi-type setups on one location (e.g. desktop + emulatedMobile) collapsed into the last entry after a restart; dedupe now keys on full setup identity, not just queue name [#259](https://github.com/sitespeedio/onlinetest/pull/259).
+
 ## 3.6.0 - 2026-05-13
 
 More `/admin` polish: activity stats from the database and a chart of recent test volume.
