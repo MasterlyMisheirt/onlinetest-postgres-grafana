@@ -2,6 +2,18 @@
 
 This changelog combines the server and testrunner changes. The changelog do [semantic versioning](https://semver.org).
 
+## 3.6.0 - 2026-05-13
+
+More `/admin` polish: activity stats from the database and a chart of recent test volume.
+
+### Added
+* Activity stats on `/admin`: totals for the last 24 hours and 7 days plus a stacked bar chart of tests per hour over the last 24 h (completed / failed / other). Pure server-rendered SVG, cached for 60 s so the auto-refresh doesn't beat on Postgres [#252](https://github.com/sitespeedio/onlinetest/pull/252).
+
+### Fixed
+* Hide the Failed count for the internal `testrunners` and `result` queues — the number was unactionable because the queues don't appear in Recent failures [#251](https://github.com/sitespeedio/onlinetest/pull/251).
+* Age labels in Recent failures now graduate to `d`/`mo` past 48 h instead of shouting `12608h ago` [#251](https://github.com/sitespeedio/onlinetest/pull/251).
+* Long URLs no longer push the `/search/` results table past its container and shove the page off-centre. URL cells now wrap at any character; the form has `overflow-x: auto` as a safety net [#253](https://github.com/sitespeedio/onlinetest/pull/253).
+
 ## 3.5.0 - 2026-05-13
 
 The `/admin` page becomes a real operator dashboard, and `/search/` gets opt-in auto-refresh.
