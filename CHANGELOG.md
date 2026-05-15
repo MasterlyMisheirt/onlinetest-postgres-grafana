@@ -6,7 +6,7 @@ This changelog combines the server and testrunner changes. The changelog do [sem
 
 Picks up sitespeed.io 41 as the default test engine, plus a `/admin` accuracy fix and a vendored compare-bundle refresh.
 
-### Changed
+### Added
 * Default sitespeed.io Docker image bumped from 40 to 41 in `.env.example`. The README "Update sitespeed.io version" snippets now reference 41 / 42 as the current and next-major tags.
 * Vendored compare bundle rolled to pagexray 5.0.0 (HTTP/3 detection, case-insensitive `Cache-Control` directives, `missingCompression` over-count fix). The bundle shrinks from ~28 KB to ~17 KB thanks to pagexray's switch from uglify-es to terser [#262](https://github.com/sitespeedio/onlinetest/pull/262).
 
