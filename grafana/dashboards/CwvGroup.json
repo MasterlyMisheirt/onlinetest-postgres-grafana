@@ -1,0 +1,2015 @@
+{
+  "apiVersion": "dashboard.grafana.app/v2",
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "cwv-group-lab",
+    "namespace": "default",
+    "uid": "1aaea8ab-8d4f-41a1-9f31-8ef200ef55ba",
+    "resourceVersion": "1788528890797014",
+    "generation": 4,
+    "creationTimestamp": "2026-09-03T12:02:07Z",
+    "labels": {
+      "grafana.app/deprecatedInternalID": "1308643316408320"
+    },
+    "annotations": {
+      "grafana.app/createdBy": "access-policy:service",
+      "grafana.app/managedBy": "classic-file-provisioning",
+      "grafana.app/managerAllowsEdits": "true",
+      "grafana.app/managerId": "sitespeed.io",
+      "grafana.app/saved-from-ui": "Grafana v13.2.0 (f681b1359f)",
+      "grafana.app/sourceChecksum": "fd82a323e094579b8d94681013021c87",
+      "grafana.app/sourcePath": "/var/lib/grafana/dashboards/CwvGroup.json",
+      "grafana.app/sourceTimestamp": "1788520399000",
+      "grafana.app/updatedBy": "user:dfx1h7foaz8jkc",
+      "grafana.app/updatedTimestamp": "2026-09-04T13:34:50Z"
+    }
+  },
+  "spec": {
+    "annotations": [
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "grafana",
+            "version": "v0",
+            "spec": {}
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "builtIn": true
+        }
+      }
+    ],
+    "cursorSync": "Off",
+    "description": "Lab Core Web Vitals from OnlineTest PostgreSQL (sitespeed_io_test_runs). Device maps to desktop or emulatedMobile. Each page uses its median lab value. Statistic (default p90) aggregates those page values across URLs (min, mean, percentiles, max).",
+    "editable": true,
+    "elements": {
+      "panel-16": {
+        "kind": "Panel",
+        "spec": {
+          "id": 16,
+          "title": "Page performance results",
+          "description": "Lab metrics for pages in the selected group and device. FAIL / WARNING / PASS from LCP, FCP, CLS, TTFB and TBT.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "onlinetest-postgres"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "WITH latest AS (\n  SELECT DISTINCT ON (COALESCE(slug, ''), url)\n    url,\n    COALESCE(slug, '') AS slug,\n    label,\n    run_date,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'largestContentfulPaint'->> 'median')::double precision AS lcp,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'firstContentfulPaint'->> 'median')::double precision AS fcp,\n    (browsertime_result->0->'statistics'->'pageinfo'->'cumulativeLayoutShift'->> 'median')::double precision AS cls,\n    (browsertime_result->0->'statistics'->'timings'->'ttfb'->> 'median')::double precision AS ttfb,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'totalBlockingTime'->> 'median')::double precision AS tbt\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND (\n      '${testname:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n    )\n  ORDER BY COALESCE(slug, ''), url, run_date DESC NULLS LAST\n)\nSELECT\n  url,\n  CASE\n    WHEN label IS NOT NULL AND BTRIM(label) ~ '^https?://' THEN BTRIM(label)\n    ELSE NULL\n  END AS external_link,\n  run_date,\n  CASE\n    WHEN COALESCE(lcp, 0) > 4000\n      OR COALESCE(fcp, 0) > 3000\n      OR COALESCE(cls, 0) > 0.25\n      OR COALESCE(ttfb, 0) > 1800\n      OR COALESCE(tbt, 0) > 600\n    THEN 0\n    WHEN COALESCE(lcp, 0) > 2500\n      OR COALESCE(fcp, 0) > 1800\n      OR COALESCE(cls, 0) > 0.1\n      OR COALESCE(ttfb, 0) > 800\n      OR COALESCE(tbt, 0) > 200\n    THEN 1\n    ELSE 2\n  END AS status,\n  lcp AS lcp_ms,\n  fcp AS fcp_ms,\n  cls,\n  ttfb AS ttfb_ms,\n  tbt AS tbt_ms\nFROM latest\nORDER BY lcp DESC NULLS LAST\n"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "table",
+            "version": "13.2.0",
+            "spec": {
+              "options": {
+                "cellHeight": "sm",
+                "enablePagination": true,
+                "showHeader": true,
+                "sortBy": [
+                  {
+                    "desc": false,
+                    "displayName": "Status"
+                  }
+                ]
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "fixed",
+                    "fixedColor": "text"
+                  },
+                  "custom": {
+                    "align": "left",
+                    "cellOptions": {
+                      "type": "auto"
+                    },
+                    "filterable": true,
+                    "footer": {
+                      "reducers": []
+                    },
+                    "inspect": false
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "url"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "URL"
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 500
+                      },
+                      {
+                        "id": "links",
+                        "value": [
+                          {
+                            "targetBlank": true,
+                            "title": "Visit page",
+                            "url": "${__data.fields.url}"
+                          },
+                          {
+                            "targetBlank": true,
+                            "title": "See metrics",
+                            "url": "${__data.fields.external_link}"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "external_link"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.hideFrom.viz",
+                        "value": true
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "run_date"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Time recorded"
+                      },
+                      {
+                        "id": "unit",
+                        "value": "dateTimeAsIso"
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 180
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "url_page"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.hideFrom.viz",
+                        "value": true
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "status"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Status"
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "mode": "basic",
+                          "type": "color-background"
+                        }
+                      },
+                      {
+                        "id": "mappings",
+                        "value": [
+                          {
+                            "options": {
+                              "0": {
+                                "color": "red",
+                                "index": 0,
+                                "text": "FAIL"
+                              },
+                              "1": {
+                                "color": "#EAB839",
+                                "index": 1,
+                                "text": "WARNING"
+                              },
+                              "2": {
+                                "color": "green",
+                                "index": 2,
+                                "text": "PASS"
+                              }
+                            },
+                            "type": "value"
+                          }
+                        ]
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 110
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "lcp_ms"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "LCP"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 0
+                      },
+                      {
+                        "id": "min",
+                        "value": 0
+                      },
+                      {
+                        "id": "max",
+                        "value": 6000
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 160
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "mode": "gradient",
+                          "type": "gauge"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "thresholds"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green",
+                              "value": 0
+                            },
+                            {
+                              "color": "#EAB839",
+                              "value": 2500
+                            },
+                            {
+                              "color": "red",
+                              "value": 4000
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "id": "unit",
+                        "value": "suffix:ms"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "fcp_ms"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "FCP"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 0
+                      },
+                      {
+                        "id": "min",
+                        "value": 0
+                      },
+                      {
+                        "id": "max",
+                        "value": 4000
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 160
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "mode": "gradient",
+                          "type": "gauge"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "thresholds"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green",
+                              "value": 0
+                            },
+                            {
+                              "color": "#EAB839",
+                              "value": 1800
+                            },
+                            {
+                              "color": "red",
+                              "value": 3000
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "id": "unit",
+                        "value": "suffix:ms"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "cls"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "CLS"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 3
+                      },
+                      {
+                        "id": "min",
+                        "value": 0
+                      },
+                      {
+                        "id": "max",
+                        "value": 0.5
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 140
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "mode": "gradient",
+                          "type": "gauge"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "thresholds"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green",
+                              "value": 0
+                            },
+                            {
+                              "color": "#EAB839",
+                              "value": 0.1
+                            },
+                            {
+                              "color": "red",
+                              "value": 0.25
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "id": "unit",
+                        "value": "none"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "ttfb_ms"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "TTFB"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 0
+                      },
+                      {
+                        "id": "min",
+                        "value": 0
+                      },
+                      {
+                        "id": "max",
+                        "value": 4000
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 160
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "mode": "gradient",
+                          "type": "gauge"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "thresholds"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green",
+                              "value": 0
+                            },
+                            {
+                              "color": "#EAB839",
+                              "value": 800
+                            },
+                            {
+                              "color": "red",
+                              "value": 1800
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "id": "unit",
+                        "value": "suffix:ms"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "tbt_ms"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "TBT"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 0
+                      },
+                      {
+                        "id": "min",
+                        "value": 0
+                      },
+                      {
+                        "id": "max",
+                        "value": 800
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 160
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "mode": "gradient",
+                          "type": "gauge"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "thresholds"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green",
+                              "value": 0
+                            },
+                            {
+                              "color": "#EAB839",
+                              "value": 200
+                            },
+                            {
+                              "color": "red",
+                              "value": 600
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "id": "unit",
+                        "value": "suffix:ms"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "page_size_bytes"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Transfer size"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 2
+                      },
+                      {
+                        "id": "min",
+                        "value": 0
+                      },
+                      {
+                        "id": "max",
+                        "value": 5000000
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 160
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "mode": "gradient",
+                          "type": "gauge"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "thresholds"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green",
+                              "value": 0
+                            },
+                            {
+                              "color": "#EAB839",
+                              "value": 500000
+                            },
+                            {
+                              "color": "red",
+                              "value": 2000000
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "id": "unit",
+                        "value": "decbytes"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "panel-41": {
+        "kind": "Panel",
+        "spec": {
+          "id": 41,
+          "title": "LCP (${stat})",
+          "description": "Statistic across URLs of each page's median lab LCP. min/max are the fastest/slowest pages; p75 is the 75th percentile of pages. Good ≤ 2500 ms, poor > 4000 ms.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "onlinetest-postgres"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "format": "time_series",
+                        "rawQuery": true,
+                        "rawSql": "WITH latest AS (\n  SELECT DISTINCT ON (date_trunc('day', run_date), COALESCE(slug, ''), url)\n    date_trunc('day', run_date) AS day,\n    url,\n    COALESCE(slug, '') AS slug,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'largestContentfulPaint'->> 'median')::double precision AS lcp,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'firstContentfulPaint'->> 'median')::double precision AS fcp,\n    (browsertime_result->0->'statistics'->'pageinfo'->'cumulativeLayoutShift'->> 'median')::double precision AS cls,\n    (browsertime_result->0->'statistics'->'timings'->'ttfb'->> 'median')::double precision AS ttfb,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'totalBlockingTime'->> 'median')::double precision AS tbt\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND (\n      '${testname:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n    )\n  ORDER BY date_trunc('day', run_date), COALESCE(slug, ''), url, run_date DESC NULLS LAST\n)\nSELECT\n  day AS time,\n  CASE '${stat:raw}'\n  WHEN 'min' THEN min_v\n  WHEN 'mean' THEN mean_v\n  WHEN 'median' THEN median_v\n  WHEN 'p10' THEN p10_v\n  WHEN 'p75' THEN p75_v\n  WHEN 'p90' THEN p90_v\n  WHEN 'p99' THEN p99_v\n  WHEN 'max' THEN max_v\n  ELSE p90_v\nEND AS \"LCP\"\nFROM (\n  SELECT\n    day,\n    MIN(lcp) AS min_v,\n    AVG(lcp) AS mean_v,\n    percentile_cont(0.5) WITHIN GROUP (ORDER BY lcp) AS median_v,\n    percentile_cont(0.10) WITHIN GROUP (ORDER BY lcp) AS p10_v,\n    percentile_cont(0.75) WITHIN GROUP (ORDER BY lcp) AS p75_v,\n    percentile_cont(0.90) WITHIN GROUP (ORDER BY lcp) AS p90_v,\n    percentile_cont(0.99) WITHIN GROUP (ORDER BY lcp) AS p99_v,\n    MAX(lcp) AS max_v\n  FROM latest\n  GROUP BY day\n) s\nORDER BY 1\n"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.2.0",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "suffix:ms",
+                  "decimals": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 2500,
+                        "color": "#EAB839"
+                      },
+                      {
+                        "value": 4000,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-42": {
+        "kind": "Panel",
+        "spec": {
+          "id": 42,
+          "title": "FCP (${stat})",
+          "description": "Statistic across URLs of each page's median lab FCP. Good ≤ 1800 ms, poor > 3000 ms.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "onlinetest-postgres"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "format": "time_series",
+                        "rawQuery": true,
+                        "rawSql": "WITH latest AS (\n  SELECT DISTINCT ON (date_trunc('day', run_date), COALESCE(slug, ''), url)\n    date_trunc('day', run_date) AS day,\n    url,\n    COALESCE(slug, '') AS slug,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'largestContentfulPaint'->> 'median')::double precision AS lcp,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'firstContentfulPaint'->> 'median')::double precision AS fcp,\n    (browsertime_result->0->'statistics'->'pageinfo'->'cumulativeLayoutShift'->> 'median')::double precision AS cls,\n    (browsertime_result->0->'statistics'->'timings'->'ttfb'->> 'median')::double precision AS ttfb,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'totalBlockingTime'->> 'median')::double precision AS tbt\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND (\n      '${testname:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n    )\n  ORDER BY date_trunc('day', run_date), COALESCE(slug, ''), url, run_date DESC NULLS LAST\n)\nSELECT\n  day AS time,\n  CASE '${stat:raw}'\n  WHEN 'min' THEN min_v\n  WHEN 'mean' THEN mean_v\n  WHEN 'median' THEN median_v\n  WHEN 'p10' THEN p10_v\n  WHEN 'p75' THEN p75_v\n  WHEN 'p90' THEN p90_v\n  WHEN 'p99' THEN p99_v\n  WHEN 'max' THEN max_v\n  ELSE p90_v\nEND AS \"FCP\"\nFROM (\n  SELECT\n    day,\n    MIN(fcp) AS min_v,\n    AVG(fcp) AS mean_v,\n    percentile_cont(0.5) WITHIN GROUP (ORDER BY fcp) AS median_v,\n    percentile_cont(0.10) WITHIN GROUP (ORDER BY fcp) AS p10_v,\n    percentile_cont(0.75) WITHIN GROUP (ORDER BY fcp) AS p75_v,\n    percentile_cont(0.90) WITHIN GROUP (ORDER BY fcp) AS p90_v,\n    percentile_cont(0.99) WITHIN GROUP (ORDER BY fcp) AS p99_v,\n    MAX(fcp) AS max_v\n  FROM latest\n  GROUP BY day\n) s\nORDER BY 1\n"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.2.0",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "suffix:ms",
+                  "decimals": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 1800,
+                        "color": "#EAB839"
+                      },
+                      {
+                        "value": 3000,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-43": {
+        "kind": "Panel",
+        "spec": {
+          "id": 43,
+          "title": "CLS (${stat})",
+          "description": "Statistic across URLs of each page's median lab CLS. Good ≤ 0.1, poor > 0.25.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "onlinetest-postgres"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "format": "time_series",
+                        "rawQuery": true,
+                        "rawSql": "WITH latest AS (\n  SELECT DISTINCT ON (date_trunc('day', run_date), COALESCE(slug, ''), url)\n    date_trunc('day', run_date) AS day,\n    url,\n    COALESCE(slug, '') AS slug,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'largestContentfulPaint'->> 'median')::double precision AS lcp,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'firstContentfulPaint'->> 'median')::double precision AS fcp,\n    (browsertime_result->0->'statistics'->'pageinfo'->'cumulativeLayoutShift'->> 'median')::double precision AS cls,\n    (browsertime_result->0->'statistics'->'timings'->'ttfb'->> 'median')::double precision AS ttfb,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'totalBlockingTime'->> 'median')::double precision AS tbt\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND (\n      '${testname:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n    )\n  ORDER BY date_trunc('day', run_date), COALESCE(slug, ''), url, run_date DESC NULLS LAST\n)\nSELECT\n  day AS time,\n  CASE '${stat:raw}'\n  WHEN 'min' THEN min_v\n  WHEN 'mean' THEN mean_v\n  WHEN 'median' THEN median_v\n  WHEN 'p10' THEN p10_v\n  WHEN 'p75' THEN p75_v\n  WHEN 'p90' THEN p90_v\n  WHEN 'p99' THEN p99_v\n  WHEN 'max' THEN max_v\n  ELSE p90_v\nEND AS \"CLS\"\nFROM (\n  SELECT\n    day,\n    MIN(cls) AS min_v,\n    AVG(cls) AS mean_v,\n    percentile_cont(0.5) WITHIN GROUP (ORDER BY cls) AS median_v,\n    percentile_cont(0.10) WITHIN GROUP (ORDER BY cls) AS p10_v,\n    percentile_cont(0.75) WITHIN GROUP (ORDER BY cls) AS p75_v,\n    percentile_cont(0.90) WITHIN GROUP (ORDER BY cls) AS p90_v,\n    percentile_cont(0.99) WITHIN GROUP (ORDER BY cls) AS p99_v,\n    MAX(cls) AS max_v\n  FROM latest\n  GROUP BY day\n) s\nORDER BY 1\n"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.2.0",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "none",
+                  "decimals": 3,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 0.1,
+                        "color": "#EAB839"
+                      },
+                      {
+                        "value": 0.25,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-44": {
+        "kind": "Panel",
+        "spec": {
+          "id": 44,
+          "title": "TTFB (${stat})",
+          "description": "Statistic across URLs of each page's median lab TTFB. Good ≤ 800 ms, poor > 1800 ms.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "onlinetest-postgres"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "format": "time_series",
+                        "rawQuery": true,
+                        "rawSql": "WITH latest AS (\n  SELECT DISTINCT ON (date_trunc('day', run_date), COALESCE(slug, ''), url)\n    date_trunc('day', run_date) AS day,\n    url,\n    COALESCE(slug, '') AS slug,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'largestContentfulPaint'->> 'median')::double precision AS lcp,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'firstContentfulPaint'->> 'median')::double precision AS fcp,\n    (browsertime_result->0->'statistics'->'pageinfo'->'cumulativeLayoutShift'->> 'median')::double precision AS cls,\n    (browsertime_result->0->'statistics'->'timings'->'ttfb'->> 'median')::double precision AS ttfb,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'totalBlockingTime'->> 'median')::double precision AS tbt\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND (\n      '${testname:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n    )\n  ORDER BY date_trunc('day', run_date), COALESCE(slug, ''), url, run_date DESC NULLS LAST\n)\nSELECT\n  day AS time,\n  CASE '${stat:raw}'\n  WHEN 'min' THEN min_v\n  WHEN 'mean' THEN mean_v\n  WHEN 'median' THEN median_v\n  WHEN 'p10' THEN p10_v\n  WHEN 'p75' THEN p75_v\n  WHEN 'p90' THEN p90_v\n  WHEN 'p99' THEN p99_v\n  WHEN 'max' THEN max_v\n  ELSE p90_v\nEND AS \"TTFB\"\nFROM (\n  SELECT\n    day,\n    MIN(ttfb) AS min_v,\n    AVG(ttfb) AS mean_v,\n    percentile_cont(0.5) WITHIN GROUP (ORDER BY ttfb) AS median_v,\n    percentile_cont(0.10) WITHIN GROUP (ORDER BY ttfb) AS p10_v,\n    percentile_cont(0.75) WITHIN GROUP (ORDER BY ttfb) AS p75_v,\n    percentile_cont(0.90) WITHIN GROUP (ORDER BY ttfb) AS p90_v,\n    percentile_cont(0.99) WITHIN GROUP (ORDER BY ttfb) AS p99_v,\n    MAX(ttfb) AS max_v\n  FROM latest\n  GROUP BY day\n) s\nORDER BY 1\n"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.2.0",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "suffix:ms",
+                  "decimals": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 800,
+                        "color": "#EAB839"
+                      },
+                      {
+                        "value": 1800,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-45": {
+        "kind": "Panel",
+        "spec": {
+          "id": 45,
+          "title": "TBT (${stat})",
+          "description": "Statistic across URLs of each page's median lab TBT. Good ≤ 200 ms, poor > 600 ms.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "onlinetest-postgres"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "format": "time_series",
+                        "rawQuery": true,
+                        "rawSql": "WITH latest AS (\n  SELECT DISTINCT ON (date_trunc('day', run_date), COALESCE(slug, ''), url)\n    date_trunc('day', run_date) AS day,\n    url,\n    COALESCE(slug, '') AS slug,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'largestContentfulPaint'->> 'median')::double precision AS lcp,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'firstContentfulPaint'->> 'median')::double precision AS fcp,\n    (browsertime_result->0->'statistics'->'pageinfo'->'cumulativeLayoutShift'->> 'median')::double precision AS cls,\n    (browsertime_result->0->'statistics'->'timings'->'ttfb'->> 'median')::double precision AS ttfb,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'totalBlockingTime'->> 'median')::double precision AS tbt\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND (\n      '${testname:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n    )\n  ORDER BY date_trunc('day', run_date), COALESCE(slug, ''), url, run_date DESC NULLS LAST\n)\nSELECT\n  day AS time,\n  CASE '${stat:raw}'\n  WHEN 'min' THEN min_v\n  WHEN 'mean' THEN mean_v\n  WHEN 'median' THEN median_v\n  WHEN 'p10' THEN p10_v\n  WHEN 'p75' THEN p75_v\n  WHEN 'p90' THEN p90_v\n  WHEN 'p99' THEN p99_v\n  WHEN 'max' THEN max_v\n  ELSE p90_v\nEND AS \"TBT\"\nFROM (\n  SELECT\n    day,\n    MIN(tbt) AS min_v,\n    AVG(tbt) AS mean_v,\n    percentile_cont(0.5) WITHIN GROUP (ORDER BY tbt) AS median_v,\n    percentile_cont(0.10) WITHIN GROUP (ORDER BY tbt) AS p10_v,\n    percentile_cont(0.75) WITHIN GROUP (ORDER BY tbt) AS p75_v,\n    percentile_cont(0.90) WITHIN GROUP (ORDER BY tbt) AS p90_v,\n    percentile_cont(0.99) WITHIN GROUP (ORDER BY tbt) AS p99_v,\n    MAX(tbt) AS max_v\n  FROM latest\n  GROUP BY day\n) s\nORDER BY 1\n"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.2.0",
+            "spec": {
+              "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "suffix:ms",
+                  "decimals": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      },
+                      {
+                        "value": 200,
+                        "color": "#EAB839"
+                      },
+                      {
+                        "value": 600,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-46": {
+        "kind": "Panel",
+        "spec": {
+          "id": 46,
+          "title": "",
+          "description": "Distinct pages with browsertime JSON, all time. Respects Device, Group name and Page URL. Ignores the dashboard time range.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "onlinetest-postgres"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "SELECT COUNT(*) AS \"URLs tracked\"\nFROM (\n  SELECT DISTINCT COALESCE(slug, ''), url\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND (\n      '${testname:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n    )\n) pages\n"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "13.2.0",
+            "spec": {
+              "options": {
+                "colorMode": "none",
+                "graphMode": "none",
+                "justifyMode": "center",
+                "orientation": "horizontal",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "text": {
+                  "valueSize": 100
+                },
+                "textMode": "value_and_name",
+                "wideLayout": false
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "none",
+                  "decimals": 0,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "text"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "fixed",
+                    "fixedColor": "blue"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "panel-7": {
+        "kind": "Panel",
+        "spec": {
+          "id": 7,
+          "title": "Page status",
+          "description": "Pages scored PASS / WARNING / FAIL from each URL's median lab LCP, FCP, CLS, TTFB and TBT (same bands as Page performance results).",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "onlinetest-postgres"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "WITH latest AS (\n  SELECT DISTINCT ON (COALESCE(slug, ''), url)\n    url,\n    COALESCE(slug, '') AS slug,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'largestContentfulPaint'->> 'median')::double precision AS lcp,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'firstContentfulPaint'->> 'median')::double precision AS fcp,\n    (browsertime_result->0->'statistics'->'pageinfo'->'cumulativeLayoutShift'->> 'median')::double precision AS cls,\n    (browsertime_result->0->'statistics'->'timings'->'ttfb'->> 'median')::double precision AS ttfb,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'totalBlockingTime'->> 'median')::double precision AS tbt\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND (\n      '${testname:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n    )\n  ORDER BY COALESCE(slug, ''), url, run_date DESC NULLS LAST\n)\nSELECT\n  COUNT(*) FILTER (WHERE status = 2) AS \"Passed\",\n  COUNT(*) FILTER (WHERE status = 1) AS \"Warning\",\n  COUNT(*) FILTER (WHERE status = 0) AS \"Failed\"\nFROM (\n  SELECT\n    CASE\n      WHEN COALESCE(lcp, 0) > 4000\n        OR COALESCE(fcp, 0) > 3000\n        OR COALESCE(cls, 0) > 0.25\n        OR COALESCE(ttfb, 0) > 1800\n        OR COALESCE(tbt, 0) > 600\n      THEN 0\n      WHEN COALESCE(lcp, 0) > 2500\n        OR COALESCE(fcp, 0) > 1800\n        OR COALESCE(cls, 0) > 0.1\n        OR COALESCE(ttfb, 0) > 800\n        OR COALESCE(tbt, 0) > 200\n      THEN 1\n      ELSE 2\n    END AS status\n  FROM latest\n) scored\n"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "piechart",
+            "version": "13.2.0",
+            "spec": {
+              "options": {
+                "displayLabels": [
+                  "percent"
+                ],
+                "legend": {
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true,
+                  "values": []
+                },
+                "pieType": "pie",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "sort": "desc",
+                "tooltip": {
+                  "hideZeros": false,
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "none",
+                  "decimals": 0,
+                  "color": {
+                    "mode": "palette-classic",
+                    "fixedColor": "#73BF69"
+                  },
+                  "custom": {
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    }
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Passed"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "green",
+                          "mode": "fixed"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Warning"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "#EAB839",
+                          "mode": "fixed"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Failed"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "red",
+                          "mode": "fixed"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "panel-9": {
+        "kind": "Panel",
+        "spec": {
+          "id": 9,
+          "title": "URLs per metric bucket",
+          "description": "One row per metric. Counts are the latest run with browsertime JSON in the window, including jobs OnlineTest marked failed. Good: LCP ≤ 2.5 s, FCP ≤ 1.8 s, CLS ≤ 0.1, TTFB ≤ 0.8 s, TBT ≤ 0.2 s.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "grafana-postgresql-datasource",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "onlinetest-postgres"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "format": "table",
+                        "rawQuery": true,
+                        "rawSql": "WITH latest AS (\n  SELECT DISTINCT ON (COALESCE(slug, ''), url)\n    url,\n    COALESCE(slug, '') AS slug,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'largestContentfulPaint'->> 'median')::double precision AS lcp,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'firstContentfulPaint'->> 'median')::double precision AS fcp,\n    (browsertime_result->0->'statistics'->'pageinfo'->'cumulativeLayoutShift'->> 'median')::double precision AS cls,\n    (browsertime_result->0->'statistics'->'timings'->'ttfb'->> 'median')::double precision AS ttfb,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'totalBlockingTime'->> 'median')::double precision AS tbt\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND (\n      '${testname:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n    )\n  ORDER BY COALESCE(slug, ''), url, run_date DESC NULLS LAST\n)\nSELECT metric, good, needs_work, poor,\n  100.0 * good / NULLIF(good + needs_work + poor, 0) AS good_pct,\n  100.0 * needs_work / NULLIF(good + needs_work + poor, 0) AS needs_work_pct,\n  100.0 * poor / NULLIF(good + needs_work + poor, 0) AS poor_pct\nFROM (\n  SELECT\n    'LCP' AS metric,\n    COUNT(*) FILTER (WHERE lcp IS NOT NULL AND lcp <= 2500) AS good,\n    COUNT(*) FILTER (WHERE lcp > 2500 AND lcp <= 4000) AS needs_work,\n    COUNT(*) FILTER (WHERE lcp > 4000) AS poor\n  FROM latest\n  UNION ALL\n  SELECT\n    'FCP',\n    COUNT(*) FILTER (WHERE fcp IS NOT NULL AND fcp <= 1800),\n    COUNT(*) FILTER (WHERE fcp > 1800 AND fcp <= 3000),\n    COUNT(*) FILTER (WHERE fcp > 3000)\n  FROM latest\n  UNION ALL\n  SELECT\n    'CLS',\n    COUNT(*) FILTER (WHERE cls IS NOT NULL AND cls <= 0.1),\n    COUNT(*) FILTER (WHERE cls > 0.1 AND cls <= 0.25),\n    COUNT(*) FILTER (WHERE cls > 0.25)\n  FROM latest\n  UNION ALL\n  SELECT\n    'TTFB',\n    COUNT(*) FILTER (WHERE ttfb IS NOT NULL AND ttfb <= 800),\n    COUNT(*) FILTER (WHERE ttfb > 800 AND ttfb <= 1800),\n    COUNT(*) FILTER (WHERE ttfb > 1800)\n  FROM latest\n  UNION ALL\n  SELECT\n    'TBT',\n    COUNT(*) FILTER (WHERE tbt IS NOT NULL AND tbt <= 200),\n    COUNT(*) FILTER (WHERE tbt > 200 AND tbt <= 600),\n    COUNT(*) FILTER (WHERE tbt > 600)\n  FROM latest\n) x\n"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "table",
+            "version": "13.2.0",
+            "spec": {
+              "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": 0,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "fixed",
+                    "fixedColor": "text"
+                  },
+                  "custom": {
+                    "align": "auto",
+                    "cellOptions": {
+                      "type": "auto"
+                    },
+                    "filterable": false,
+                    "footer": {
+                      "reducers": []
+                    },
+                    "inspect": false
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "metric"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Metric"
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 80
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "good"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Good URLs"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 0
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 100
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "auto"
+                        }
+                      },
+                      {
+                        "id": "unit",
+                        "value": "none"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "needs_work"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Needs work"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 0
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 110
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "auto"
+                        }
+                      },
+                      {
+                        "id": "unit",
+                        "value": "none"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "poor"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Poor URLs"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 0
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 100
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "auto"
+                        }
+                      },
+                      {
+                        "id": "unit",
+                        "value": "none"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "good_pct"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Good %"
+                      },
+                      {
+                        "id": "unit",
+                        "value": "percent"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 0
+                      },
+                      {
+                        "id": "min",
+                        "value": 0
+                      },
+                      {
+                        "id": "max",
+                        "value": 100
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "mode": "lcd",
+                          "type": "gauge"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "green",
+                          "mode": "fixed"
+                        }
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 140
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "needs_work_pct"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Needs work %"
+                      },
+                      {
+                        "id": "unit",
+                        "value": "percent"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 0
+                      },
+                      {
+                        "id": "min",
+                        "value": 0
+                      },
+                      {
+                        "id": "max",
+                        "value": 100
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "mode": "lcd",
+                          "type": "gauge"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "yellow",
+                          "mode": "fixed"
+                        }
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 140
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "poor_pct"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Poor %"
+                      },
+                      {
+                        "id": "unit",
+                        "value": "percent"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 0
+                      },
+                      {
+                        "id": "min",
+                        "value": 0
+                      },
+                      {
+                        "id": "max",
+                        "value": 100
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "mode": "lcd",
+                          "type": "gauge"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "red",
+                          "mode": "fixed"
+                        }
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 140
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "layout": {
+      "kind": "RowsLayout",
+      "spec": {
+        "rows": [
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "title": "Page status",
+              "collapse": false,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 3,
+                        "height": 8,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-46"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 3,
+                        "y": 0,
+                        "width": 2,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-41"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 5,
+                        "y": 0,
+                        "width": 2,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-44"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 7,
+                        "y": 0,
+                        "width": 2,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-43"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 3,
+                        "y": 4,
+                        "width": 2,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-45"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 5,
+                        "y": 4,
+                        "width": 2,
+                        "height": 4,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-42"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "title": "Metric classification",
+              "collapse": false,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 4,
+                        "height": 8,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-7"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 4,
+                        "y": 0,
+                        "width": 7,
+                        "height": 8,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-9"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "kind": "RowsLayoutRow",
+            "spec": {
+              "title": "Page performance results",
+              "collapse": false,
+              "layout": {
+                "kind": "GridLayout",
+                "spec": {
+                  "items": [
+                    {
+                      "kind": "GridLayoutItem",
+                      "spec": {
+                        "x": 0,
+                        "y": 0,
+                        "width": 12,
+                        "height": 12,
+                        "element": {
+                          "kind": "ElementReference",
+                          "name": "panel-16"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "links": [],
+    "liveNow": false,
+    "preload": false,
+    "tags": [
+      "cwv",
+      "group",
+      "lab",
+      "pages"
+    ],
+    "timeSettings": {
+      "timezone": "browser",
+      "from": "now-28d/m",
+      "to": "now/m",
+      "autoRefresh": "",
+      "autoRefreshIntervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "hideTimepicker": false,
+      "fiscalYearStartMonth": 0
+    },
+    "title": "CWV Group",
+    "variables": [
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "device",
+          "query": "desktop,mobile",
+          "current": {
+            "text": "desktop",
+            "value": "desktop"
+          },
+          "options": [
+            {
+              "selected": true,
+              "text": "desktop",
+              "value": "desktop"
+            },
+            {
+              "selected": false,
+              "text": "mobile",
+              "value": "mobile"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Device",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "allowCustomValue": true,
+          "valuesFormat": "csv"
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "group",
+          "current": {
+            "text": "All",
+            "value": "$__all"
+          },
+          "label": "Group name",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "query": {
+            "kind": "DataQuery",
+            "group": "grafana-postgresql-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "onlinetest-postgres"
+            },
+            "spec": {
+              "editorMode": "code",
+              "format": "table",
+              "rawQuery": true,
+              "rawSql": "SELECT DISTINCT COALESCE(NULLIF(BTRIM(slug), ''), 'default') AS __text,\n       COALESCE(NULLIF(BTRIM(slug), ''), 'default') AS __value\nFROM sitespeed_io_test_runs\nWHERE browsertime_result IS NOT NULL\nORDER BY 1",
+              "refId": "A"
+            }
+          },
+          "regex": "",
+          "regexApplyTo": "value",
+          "sort": "alphabeticalAsc",
+          "definition": "SELECT DISTINCT COALESCE(NULLIF(BTRIM(slug), ''), 'default') AS __text,\n       COALESCE(NULLIF(BTRIM(slug), ''), 'default') AS __value\nFROM sitespeed_io_test_runs\nWHERE browsertime_result IS NOT NULL\nORDER BY 1",
+          "options": [],
+          "multi": true,
+          "includeAll": true,
+          "allValue": "*",
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "testname",
+          "current": {
+            "text": "All",
+            "value": "$__all"
+          },
+          "label": "Page URL",
+          "hide": "dontHide",
+          "refresh": "onTimeRangeChanged",
+          "skipUrlSync": false,
+          "query": {
+            "kind": "DataQuery",
+            "group": "grafana-postgresql-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "onlinetest-postgres"
+            },
+            "spec": {
+              "editorMode": "code",
+              "format": "table",
+              "rawQuery": true,
+              "rawSql": "SELECT DISTINCT url AS __text, url AS __value\nFROM sitespeed_io_test_runs\nWHERE browsertime_result IS NOT NULL\n  AND (\n    '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n    OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n  )\nORDER BY 1",
+              "refId": "A"
+            }
+          },
+          "regex": "",
+          "regexApplyTo": "value",
+          "sort": "alphabeticalAsc",
+          "definition": "SELECT DISTINCT url AS __text, url AS __value\nFROM sitespeed_io_test_runs\nWHERE browsertime_result IS NOT NULL\n  AND (\n    '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n    OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n  )\nORDER BY 1",
+          "options": [],
+          "multi": true,
+          "includeAll": true,
+          "allValue": "*",
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "stat",
+          "query": "min,mean,median,p10,p75,p90,p99,max",
+          "current": {
+            "text": "p90",
+            "value": "p90"
+          },
+          "options": [
+            {
+              "selected": false,
+              "text": "min",
+              "value": "min"
+            },
+            {
+              "selected": false,
+              "text": "mean",
+              "value": "mean"
+            },
+            {
+              "selected": false,
+              "text": "median",
+              "value": "median"
+            },
+            {
+              "selected": false,
+              "text": "p10",
+              "value": "p10"
+            },
+            {
+              "selected": false,
+              "text": "p75",
+              "value": "p75"
+            },
+            {
+              "selected": true,
+              "text": "p90",
+              "value": "p90"
+            },
+            {
+              "selected": false,
+              "text": "p99",
+              "value": "p99"
+            },
+            {
+              "selected": false,
+              "text": "max",
+              "value": "max"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Statistic",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "allowCustomValue": true,
+          "valuesFormat": "csv"
+        }
+      }
+    ]
+  }
+}
