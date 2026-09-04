@@ -111,3 +111,19 @@ queue:
 # If you don't setup a default sitespeed.io configuration, you can add
 # your sitespeed.io configuration directly in this block
 sitespeed.io:
+  slug: default
+  browsertime:
+    iterations: 1
+    video: false
+    visualMetrics: false
+    screenshot: false
+    screenshotLCP: false
+    screenshotLS: false
+    pageCompleteWaitTime: 300
+    chrome:
+      args:
+        - "--headless=new"
+        - "--blink-settings=imagesEnabled=false"
+        - "--disable-dev-shm-usage"
+        - "--no-sandbox"
+        - "--disable-gpu"
