@@ -112,6 +112,12 @@ queue:
 # your sitespeed.io configuration directly in this block
 sitespeed.io:
   slug: default
+  plugins:
+    remove:
+      - html
+      - coach
+      - assets
+      - budget
   browsertime:
     iterations: 1
     video: false
@@ -119,7 +125,13 @@ sitespeed.io:
     screenshot: false
     screenshotLCP: false
     screenshotLS: false
-    pageCompleteWaitTime: 300
+    pageCompleteWaitTime: 0
+    pageCompleteCheckStartWait: 100
+    pageCompleteCheckPollTimeout: 100
+    pageCompleteCheck: "return window.performance.timing.loadEventEnd > 0;"
+    connectivity:
+      profile: native
+      engine: external
     chrome:
       args:
         - "--headless=new"
