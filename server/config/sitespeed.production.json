@@ -4,6 +4,7 @@
     "remove": ["html", "coach", "assets", "budget"]
   },
   "browsertime": {
+    "skipHar": true,
     "iterations": 1,
     "video": false,
     "visualMetrics": false,
