@@ -634,7 +634,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  lcp AS \"LCP\"\n  FROM sitespeed_io_test_runs\n  WHERE lcp IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  run_date AS time,\n  lcp AS \"LCP\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
                       }
                     },
                     "refId": "A",
@@ -757,7 +757,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  fcp AS \"FCP\"\n  FROM sitespeed_io_test_runs\n  WHERE lcp IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  run_date AS time,\n  fcp AS \"FCP\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
                       }
                     },
                     "refId": "A",
@@ -880,7 +880,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  cls AS \"CLS\"\n  FROM sitespeed_io_test_runs\n  WHERE lcp IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  run_date AS time,\n  cls AS \"CLS\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
                       }
                     },
                     "refId": "A",
@@ -1003,7 +1003,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  ttfb AS \"TTFB\"\n  FROM sitespeed_io_test_runs\n  WHERE lcp IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  run_date AS time,\n  ttfb AS \"TTFB\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
                       }
                     },
                     "refId": "A",
@@ -1126,7 +1126,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  tbt AS \"TBT\"\n  FROM sitespeed_io_test_runs\n  WHERE lcp IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  run_date AS time,\n  tbt AS \"TBT\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
                       }
                     },
                     "refId": "A",
