@@ -76,6 +76,8 @@ services:
       redis_host: ${REDIS_HOST}
       postgresql_server: ${POSTGRESQL_HOST}
       validTestDomains: ${VALID_TEST_DOMAINS}
+    volumes:
+      - ../server/config/server.yaml:/usr/src/app/config/server.yaml:ro
     ports:
       - "3000:3000"
     restart: always

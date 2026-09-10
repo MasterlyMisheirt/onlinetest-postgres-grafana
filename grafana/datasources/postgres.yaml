@@ -1,0 +1,25 @@
+# OnlineTest PostgreSQL — URL tables for CWV Group (not Graphite).
+# Grafana must be on Docker network `skynet` so host `postgresql` resolves.
+# Password comes from the Grafana container env (POSTGRESQL_*).
+apiVersion: 1
+
+datasources:
+  - name: onlinetest-postgres
+    type: postgres
+    uid: onlinetest-postgres
+    access: proxy
+    orgId: 1
+    url: postgresql:5432
+    user: ${POSTGRESQL_USER}
+    isDefault: false
+    editable: true
+    jsonData:
+      database: ${POSTGRESQL_DB}
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: false
+      maxOpenConns: 10
+      maxIdleConns: 5
+      connMaxLifetime: 14400
+    secureJsonData:
+      password: ${POSTGRESQL_PASSWORD}

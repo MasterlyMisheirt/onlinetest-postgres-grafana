@@ -105,17 +105,17 @@ if [ -n "$VERSION" ]; then
 fi
 
 echo ">> Pulling images (mode=$MODE)…"
-docker compose "${COMPOSE_FILES[@]}" pull
+docker compose --env-file "$REPO_ROOT/.env" "${COMPOSE_FILES[@]}" pull
 
 echo ">> Restarting services…"
-docker compose "${COMPOSE_FILES[@]}" up -d --remove-orphans
+docker compose --env-file "$REPO_ROOT/.env" "${COMPOSE_FILES[@]}" up -d --remove-orphans
 
 echo ">> Container status:"
-docker compose "${COMPOSE_FILES[@]}" ps
+docker compose --env-file "$REPO_ROOT/.env" "${COMPOSE_FILES[@]}" ps
 
 echo ">> Tailing logs for 10 seconds (Ctrl+C to keep watching)…"
 # `timeout` returns 124 when it kills the process — that's the success path
 # here, so swallow the non-zero exit. Plain `|| true` keeps `set -e` happy.
-timeout 10 docker compose "${COMPOSE_FILES[@]}" logs --tail 30 -f || true
+timeout 10 docker compose --env-file "$REPO_ROOT/.env" "${COMPOSE_FILES[@]}" logs --tail 30 -f || true
 
 echo ">> Done."

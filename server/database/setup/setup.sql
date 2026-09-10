@@ -20,10 +20,22 @@ CREATE TABLE sitespeed_io_test_runs (
     configuration JSONB,
     cli_params TEXT,
     failed_reason TEXT,
-    finished_date TIMESTAMP
+    finished_date TIMESTAMP,
+    lcp DOUBLE PRECISION,
+    fcp DOUBLE PRECISION,
+    cls DOUBLE PRECISION,
+    ttfb DOUBLE PRECISION,
+    tbt DOUBLE PRECISION
 );
 
 CREATE INDEX url_index ON sitespeed_io_test_runs (url);
 CREATE INDEX run_date_index ON sitespeed_io_test_runs (run_date);
 CREATE INDEX scripting_name_index ON sitespeed_io_test_runs (scripting_name);
 CREATE INDEX label_index ON sitespeed_io_test_runs (label);
+CREATE INDEX sitespeed_io_test_runs_grafana_idx
+  ON sitespeed_io_test_runs (
+    COALESCE(NULLIF(BTRIM(slug), ''), 'default'),
+    test_type,
+    run_date DESC
+  )
+  WHERE browsertime_result IS NOT NULL;
