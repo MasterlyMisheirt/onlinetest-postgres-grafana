@@ -44,7 +44,7 @@
       }
     ],
     "cursorSync": "Crosshair",
-    "description": "Lab Core Web Vitals for one URL. Metrics use Statistic (Browsertime iteration key: min / median / p90 / max). Over time graphs always use median of that job.",
+    "description": "Lab Core Web Vitals for one URL. Metrics use Statistic (Browsertime iteration key: min / median / p90 / max). Over time graphs use the median of that day's jobs.",
     "editable": true,
     "elements": {
       "panel-11": {
@@ -614,7 +614,7 @@
         "spec": {
           "id": 2,
           "title": "LCP over time",
-          "description": "Median lab LCP for the selected URL on each test run. Good \u2264 2500 ms, poor > 4000 ms.",
+          "description": "Median of this URL's lab LCP across jobs that day. Good \u2264 2500 ms, poor > 4000 ms.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -634,7 +634,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  lcp AS \"LCP\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  date_trunc('day', run_date) AS time,\n  percentile_cont(0.5) WITHIN GROUP (ORDER BY lcp) AS \"LCP\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  GROUP BY 1\n  ORDER BY 1\n"
                       }
                     },
                     "refId": "A",
@@ -737,7 +737,7 @@
         "spec": {
           "id": 3,
           "title": "FCP over time",
-          "description": "Median lab FCP for the selected URL on each test run. Good \u2264 1800 ms, poor > 3000 ms.",
+          "description": "Median of this URL's lab FCP across jobs that day. Good \u2264 1800 ms, poor > 3000 ms.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -757,7 +757,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  fcp AS \"FCP\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  date_trunc('day', run_date) AS time,\n  percentile_cont(0.5) WITHIN GROUP (ORDER BY fcp) AS \"FCP\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  GROUP BY 1\n  ORDER BY 1\n"
                       }
                     },
                     "refId": "A",
@@ -860,7 +860,7 @@
         "spec": {
           "id": 4,
           "title": "CLS over time",
-          "description": "Median lab CLS for the selected URL on each test run. Good \u2264 0.1, poor > 0.25.",
+          "description": "Median of this URL's lab CLS across jobs that day. Good \u2264 0.1, poor > 0.25.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -880,7 +880,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  cls AS \"CLS\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  date_trunc('day', run_date) AS time,\n  percentile_cont(0.5) WITHIN GROUP (ORDER BY cls) AS \"CLS\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  GROUP BY 1\n  ORDER BY 1\n"
                       }
                     },
                     "refId": "A",
@@ -983,7 +983,7 @@
         "spec": {
           "id": 5,
           "title": "TTFB over time",
-          "description": "Median lab TTFB for the selected URL on each test run. Good \u2264 800 ms, poor > 1800 ms.",
+          "description": "Median of this URL's lab TTFB across jobs that day. Good \u2264 800 ms, poor > 1800 ms.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1003,7 +1003,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  ttfb AS \"TTFB\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  date_trunc('day', run_date) AS time,\n  percentile_cont(0.5) WITHIN GROUP (ORDER BY ttfb) AS \"TTFB\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  GROUP BY 1\n  ORDER BY 1\n"
                       }
                     },
                     "refId": "A",
@@ -1106,7 +1106,7 @@
         "spec": {
           "id": 6,
           "title": "TBT over time",
-          "description": "Median lab TBT for the selected URL on each test run. Good \u2264 200 ms, poor > 600 ms.",
+          "description": "Median of this URL's lab TBT across jobs that day. Good \u2264 200 ms, poor > 600 ms.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1126,7 +1126,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  tbt AS \"TBT\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  date_trunc('day', run_date) AS time,\n  percentile_cont(0.5) WITHIN GROUP (ORDER BY tbt) AS \"TBT\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  GROUP BY 1\n  ORDER BY 1\n"
                       }
                     },
                     "refId": "A",
