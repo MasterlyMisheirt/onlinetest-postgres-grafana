@@ -164,7 +164,7 @@
         "spec": {
           "id": 12,
           "title": "LCP (${stat})",
-          "description": "Latest run LCP for this URL, selected iteration statistic. Good ≤ 2500 ms, poor > 4000 ms.",
+          "description": "Latest run LCP for this URL, selected iteration statistic. Good \u2264 2500 ms, poor > 4000 ms.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -254,7 +254,7 @@
         "spec": {
           "id": 13,
           "title": "FCP (${stat})",
-          "description": "Latest run FCP for this URL, selected iteration statistic. Good ≤ 1800 ms, poor > 3000 ms.",
+          "description": "Latest run FCP for this URL, selected iteration statistic. Good \u2264 1800 ms, poor > 3000 ms.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -344,7 +344,7 @@
         "spec": {
           "id": 14,
           "title": "CLS (${stat})",
-          "description": "Latest run CLS for this URL, selected iteration statistic. Good ≤ 0.1, poor > 0.25.",
+          "description": "Latest run CLS for this URL, selected iteration statistic. Good \u2264 0.1, poor > 0.25.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -434,7 +434,7 @@
         "spec": {
           "id": 15,
           "title": "TTFB (${stat})",
-          "description": "Latest run TTFB for this URL, selected iteration statistic. Good ≤ 800 ms, poor > 1800 ms.",
+          "description": "Latest run TTFB for this URL, selected iteration statistic. Good \u2264 800 ms, poor > 1800 ms.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -524,7 +524,7 @@
         "spec": {
           "id": 16,
           "title": "TBT (${stat})",
-          "description": "Latest run TBT for this URL, selected iteration statistic. Good ≤ 200 ms, poor > 600 ms.",
+          "description": "Latest run TBT for this URL, selected iteration statistic. Good \u2264 200 ms, poor > 600 ms.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -614,7 +614,7 @@
         "spec": {
           "id": 2,
           "title": "LCP over time",
-          "description": "Median lab LCP for the selected URL on each test run. Good ≤ 2500 ms, poor > 4000 ms.",
+          "description": "Median lab LCP for the selected URL on each test run. Good \u2264 2500 ms, poor > 4000 ms.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -634,7 +634,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  (browsertime_result->0->'statistics'->'googleWebVitals'->'largestContentfulPaint'->> 'median')::double precision AS \"LCP\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  run_date AS time,\n  lcp AS \"LCP\"\n  FROM sitespeed_io_test_runs\n  WHERE lcp IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
                       }
                     },
                     "refId": "A",
@@ -737,7 +737,7 @@
         "spec": {
           "id": 3,
           "title": "FCP over time",
-          "description": "Median lab FCP for the selected URL on each test run. Good ≤ 1800 ms, poor > 3000 ms.",
+          "description": "Median lab FCP for the selected URL on each test run. Good \u2264 1800 ms, poor > 3000 ms.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -757,7 +757,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  (browsertime_result->0->'statistics'->'googleWebVitals'->'firstContentfulPaint'->> 'median')::double precision AS \"FCP\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  run_date AS time,\n  fcp AS \"FCP\"\n  FROM sitespeed_io_test_runs\n  WHERE lcp IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
                       }
                     },
                     "refId": "A",
@@ -860,7 +860,7 @@
         "spec": {
           "id": 4,
           "title": "CLS over time",
-          "description": "Median lab CLS for the selected URL on each test run. Good ≤ 0.1, poor > 0.25.",
+          "description": "Median lab CLS for the selected URL on each test run. Good \u2264 0.1, poor > 0.25.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -880,7 +880,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  (browsertime_result->0->'statistics'->'pageinfo'->'cumulativeLayoutShift'->> 'median')::double precision AS \"CLS\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  run_date AS time,\n  cls AS \"CLS\"\n  FROM sitespeed_io_test_runs\n  WHERE lcp IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
                       }
                     },
                     "refId": "A",
@@ -983,7 +983,7 @@
         "spec": {
           "id": 5,
           "title": "TTFB over time",
-          "description": "Median lab TTFB for the selected URL on each test run. Good ≤ 800 ms, poor > 1800 ms.",
+          "description": "Median lab TTFB for the selected URL on each test run. Good \u2264 800 ms, poor > 1800 ms.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1003,7 +1003,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  (browsertime_result->0->'statistics'->'timings'->'ttfb'->> 'median')::double precision AS \"TTFB\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  run_date AS time,\n  ttfb AS \"TTFB\"\n  FROM sitespeed_io_test_runs\n  WHERE lcp IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
                       }
                     },
                     "refId": "A",
@@ -1106,7 +1106,7 @@
         "spec": {
           "id": 6,
           "title": "TBT over time",
-          "description": "Median lab TBT for the selected URL on each test run. Good ≤ 200 ms, poor > 600 ms.",
+          "description": "Median lab TBT for the selected URL on each test run. Good \u2264 200 ms, poor > 600 ms.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1126,7 +1126,7 @@
                         "editorMode": "code",
                         "format": "time_series",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  run_date AS time,\n  (browsertime_result->0->'statistics'->'googleWebVitals'->'totalBlockingTime'->> 'median')::double precision AS \"TBT\"\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
+                        "rawSql": "SELECT\n  run_date AS time,\n  tbt AS \"TBT\"\n  FROM sitespeed_io_test_runs\n  WHERE lcp IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date\n"
                       }
                     },
                     "refId": "A",

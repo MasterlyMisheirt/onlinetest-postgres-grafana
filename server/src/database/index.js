@@ -144,6 +144,39 @@ export async function updateLabel(id, label) {
   }
 }
 
+function finiteNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function firstBrowsertimePage(browsertimeJSON) {
+  if (Array.isArray(browsertimeJSON) && browsertimeJSON.length > 0) {
+    return browsertimeJSON[0];
+  }
+  if (browsertimeJSON && typeof browsertimeJSON === 'object') {
+    return browsertimeJSON;
+  }
+  return undefined;
+}
+
+// Grafana dashboards read these five medians on every panel. Copy them
+// out of the (toasted) JSONB blob at write time so those queries never
+// detoast browsertime_result. Missing/non-numeric values stay NULL.
+function extractCwvMedians(browsertimeJSON) {
+  const statistics = firstBrowsertimePage(browsertimeJSON)?.statistics;
+  return {
+    lcp: finiteNumber(
+      statistics?.googleWebVitals?.largestContentfulPaint?.median
+    ),
+    fcp: finiteNumber(
+      statistics?.googleWebVitals?.firstContentfulPaint?.median
+    ),
+    cls: finiteNumber(statistics?.pageinfo?.cumulativeLayoutShift?.median),
+    ttfb: finiteNumber(statistics?.timings?.ttfb?.median),
+    tbt: finiteNumber(statistics?.googleWebVitals?.totalBlockingTime?.median)
+  };
+}
+
 /**
  * Update a test. failedReason is the testrunner-supplied explanation
  * (exit code + tail of stderr) when status='failed'; for 'completed'
@@ -161,8 +194,9 @@ export async function updateTest(
   // finished_date = NOW() captures the wall-clock time the result
   // landed in the DB; pair with added_date / run_date to measure queue
   // wait and run duration.
+  const { lcp, fcp, cls, ttfb, tbt } = extractCwvMedians(browsertimeJSON);
   const update =
-    'UPDATE sitespeed_io_test_runs SET status = $1, run_date = $2, result_url = $3, browsertime_result = $4,  har = $5, finished_date = NOW(), failed_reason = $6 WHERE id = $7';
+    'UPDATE sitespeed_io_test_runs SET status = $1, run_date = $2, result_url = $3, browsertime_result = $4,  har = $5, finished_date = NOW(), failed_reason = $6, lcp = $7, fcp = $8, cls = $9, ttfb = $10, tbt = $11 WHERE id = $12';
 
   const values = [
     status,
@@ -171,6 +205,11 @@ export async function updateTest(
     JSON.stringify(browsertimeJSON),
     JSON.stringify(har),
     failedReason || undefined,
+    lcp,
+    fcp,
+    cls,
+    ttfb,
+    tbt,
     id
   ];
   try {
