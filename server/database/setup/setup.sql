@@ -33,5 +33,9 @@ CREATE INDEX run_date_index ON sitespeed_io_test_runs (run_date);
 CREATE INDEX scripting_name_index ON sitespeed_io_test_runs (scripting_name);
 CREATE INDEX label_index ON sitespeed_io_test_runs (label);
 CREATE INDEX sitespeed_io_test_runs_grafana_idx
-  ON sitespeed_io_test_runs (slug, test_type, run_date DESC)
-  WHERE lcp IS NOT NULL;
+  ON sitespeed_io_test_runs (
+    COALESCE(NULLIF(BTRIM(slug), ''), 'default'),
+    test_type,
+    run_date DESC
+  )
+  WHERE browsertime_result IS NOT NULL;
