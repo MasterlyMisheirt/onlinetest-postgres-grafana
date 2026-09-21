@@ -7,7 +7,6 @@ import { getQueueById } from '../../queuehandler.js';
 import { getText } from '../../util/text.js';
 
 import { getTest } from '../../database/index.js';
-import { buildGrafanaResultUrl } from '../../util/grafana-result-url.js';
 
 export const result = Router();
 const logger = getLogger('sitespeedio.server');
@@ -20,16 +19,6 @@ result.get('/:id', async function (request, response) {
     if (job) {
       const status = await job.getState();
       if (status === 'completed' || status === 'failed') {
-        if (status === 'completed') {
-          const testRow = await getTest(id);
-          const grafanaUrl = buildGrafanaResultUrl(
-            testRow || { url: job.data?.url },
-            nconf
-          );
-          if (grafanaUrl) {
-            return response.redirect(grafanaUrl);
-          }
-        }
         if (job.returnvalue.pageSummaryUrl) {
           return response.redirect(job.returnvalue.pageSummaryUrl);
         } else if (status === 'failed') {
@@ -133,12 +122,6 @@ result.get('/:id', async function (request, response) {
       testResult.status === 'completed' ||
       testResult.status === 'failed'
     ) {
-      if (testResult.status === 'completed') {
-        const grafanaUrl = buildGrafanaResultUrl(testResult, nconf);
-        if (grafanaUrl) {
-          return response.redirect(grafanaUrl);
-        }
-      }
       if (testResult.result_url) {
         return response.redirect(testResult.result_url);
       } else if (testResult.status === 'failed') {

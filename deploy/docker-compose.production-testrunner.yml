@@ -7,7 +7,7 @@ services:
       redis_host: ${REDIS_HOST}
       location_name: ${LOCATION_NAME}
       docker_container: ${SITESPEED_IO_CONTAINER}
-c      docker_extraparameters: ""
+      docker_extraparameters: ""
       sitespeed.io_s3_endpoint: ${SITESPEED_IO_S3_ENDPOINT}
       sitespeed.io_s3_bucketname: 'sitespeedio'
       sitespeed.io_s3_key: ${MINIO_USER}
@@ -15,7 +15,6 @@ c      docker_extraparameters: ""
       sitespeed.io_s3_region: "motown"
       sitespeed.io_s3_options_forcePathStyle: true
       sitespeed.io_s3_removeLocalResult: true
-      sitespeed.io_resultBaseURL: ${RESULT_BASE_URL}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp:/tmp
