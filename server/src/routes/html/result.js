@@ -7,15 +7,10 @@ import { getQueueById } from '../../queuehandler.js';
 import { getText } from '../../util/text.js';
 
 import { getTest } from '../../database/index.js';
+import { buildGrafanaResultUrl } from '../../util/grafana-result-url.js';
 
 export const result = Router();
 const logger = getLogger('sitespeedio.server');
-
-// When the html plugin is removed, sitespeed.io still reports a
-// pageSummaryUrl for a report it never wrote. Configure this to send
-// finished tests to a Grafana dashboard instead. Unset keeps the
-// upstream pageSummaryUrl behaviour.
-const grafanaResultUrl = nconf.get('grafana:result:url');
 
 result.get('/:id', async function (request, response) {
   const id = request.params.id;
@@ -25,9 +20,17 @@ result.get('/:id', async function (request, response) {
     if (job) {
       const status = await job.getState();
       if (status === 'completed' || status === 'failed') {
-        if (status === 'completed' && grafanaResultUrl) {
-          return response.redirect(grafanaResultUrl);
-        } else if (job.returnvalue.pageSummaryUrl) {
+        if (status === 'completed') {
+          const testRow = await getTest(id);
+          const grafanaUrl = buildGrafanaResultUrl(
+            testRow || { url: job.data?.url },
+            nconf
+          );
+          if (grafanaUrl) {
+            return response.redirect(grafanaUrl);
+          }
+        }
+        if (job.returnvalue.pageSummaryUrl) {
           return response.redirect(job.returnvalue.pageSummaryUrl);
         } else if (status === 'failed') {
           const { logs } = await workQueue.getJobLogs(id);
@@ -130,9 +133,13 @@ result.get('/:id', async function (request, response) {
       testResult.status === 'completed' ||
       testResult.status === 'failed'
     ) {
-      if (testResult.status === 'completed' && grafanaResultUrl) {
-        return response.redirect(grafanaResultUrl);
-      } else if (testResult.result_url) {
+      if (testResult.status === 'completed') {
+        const grafanaUrl = buildGrafanaResultUrl(testResult, nconf);
+        if (grafanaUrl) {
+          return response.redirect(grafanaUrl);
+        }
+      }
+      if (testResult.result_url) {
         return response.redirect(testResult.result_url);
       } else if (testResult.status === 'failed') {
         return response.render('error', {
