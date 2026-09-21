@@ -11,6 +11,12 @@ import { getTest } from '../../database/index.js';
 export const result = Router();
 const logger = getLogger('sitespeedio.server');
 
+// When the html plugin is removed, sitespeed.io still reports a
+// pageSummaryUrl for a report it never wrote. Configure this to send
+// finished tests to a Grafana dashboard instead. Unset keeps the
+// upstream pageSummaryUrl behaviour.
+const grafanaResultUrl = nconf.get('grafana:result:url');
+
 result.get('/:id', async function (request, response) {
   const id = request.params.id;
   const workQueue = getQueueById(id);
@@ -19,7 +25,9 @@ result.get('/:id', async function (request, response) {
     if (job) {
       const status = await job.getState();
       if (status === 'completed' || status === 'failed') {
-        if (job.returnvalue.pageSummaryUrl) {
+        if (status === 'completed' && grafanaResultUrl) {
+          return response.redirect(grafanaResultUrl);
+        } else if (job.returnvalue.pageSummaryUrl) {
           return response.redirect(job.returnvalue.pageSummaryUrl);
         } else if (status === 'failed') {
           const { logs } = await workQueue.getJobLogs(id);
@@ -122,7 +130,9 @@ result.get('/:id', async function (request, response) {
       testResult.status === 'completed' ||
       testResult.status === 'failed'
     ) {
-      if (testResult.result_url) {
+      if (testResult.status === 'completed' && grafanaResultUrl) {
+        return response.redirect(grafanaResultUrl);
+      } else if (testResult.result_url) {
         return response.redirect(testResult.result_url);
       } else if (testResult.status === 'failed') {
         return response.render('error', {

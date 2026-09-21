@@ -105,6 +105,14 @@ queue:
   attempts: 2
 
 
+# Where to send finished tests. Set this when the html plugin is removed,
+# so results open a Grafana dashboard instead of a report that was never
+# written. Leave empty to keep the sitespeed.io pageSummaryUrl behaviour.
+# Env: GRAFANA_RESULT_URL
+grafana:
+  result:
+    url:
+
 # The default sitspeed.io configuration file that will be merged to all tests.
 # defaultSitespeedioConfigFile:
 
