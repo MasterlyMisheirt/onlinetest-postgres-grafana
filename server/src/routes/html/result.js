@@ -11,6 +11,8 @@ import { getTest } from '../../database/index.js';
 export const result = Router();
 const logger = getLogger('sitespeedio.server');
 
+const grafanaResultUrl = nconf.get('grafana:result:url');
+
 result.get('/:id', async function (request, response) {
   const id = request.params.id;
   const workQueue = getQueueById(id);
@@ -19,6 +21,9 @@ result.get('/:id', async function (request, response) {
     if (job) {
       const status = await job.getState();
       if (status === 'completed' || status === 'failed') {
+        if (status === 'completed' && grafanaResultUrl) {
+          return response.redirect(grafanaResultUrl);
+        }
         if (job.returnvalue.pageSummaryUrl) {
           return response.redirect(job.returnvalue.pageSummaryUrl);
         } else if (status === 'failed') {
@@ -122,6 +127,9 @@ result.get('/:id', async function (request, response) {
       testResult.status === 'completed' ||
       testResult.status === 'failed'
     ) {
+      if (testResult.status === 'completed' && grafanaResultUrl) {
+        return response.redirect(grafanaResultUrl);
+      }
       if (testResult.result_url) {
         return response.redirect(testResult.result_url);
       } else if (testResult.status === 'failed') {

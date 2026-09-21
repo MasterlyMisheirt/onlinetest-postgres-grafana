@@ -105,6 +105,12 @@ queue:
   attempts: 2
 
 
+# Finished tests redirect here when set (html reports are disabled).
+# Env: GRAFANA_RESULT_URL — full URL, e.g. http://host:3001/d/cwv-group-lab/cwv-group
+grafana:
+  result:
+    url:
+
 # The default sitspeed.io configuration file that will be merged to all tests.
 # defaultSitespeedioConfigFile:
 

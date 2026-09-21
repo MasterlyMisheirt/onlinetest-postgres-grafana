@@ -8,7 +8,6 @@ services:
       location_name: ${LOCATION_NAME}
       docker_container: ${SITESPEED_IO_CONTAINER}
       docker_extraparameters: "--network=skynet"
-      sitespeed.io_resultBaseURL: ${RESULT_BASE_URL}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp:/tmp

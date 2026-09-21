@@ -412,8 +412,8 @@ block content
                       span.icon-text
                         span
                           - const extras = `Go to test result.\n${test.connectivity?'Connectivity:' + test.connectivity + '\n':''}Added date:${dayjs(test.added_date).format(nconf.get('dateformat'))} ${test.run_date?'\nRun date:' + dayjs(test.run_date).format(nconf.get('dateformat')):''}`
-                          if test.result_url
-                            a(href=test.result_url title=extras) #{test.scripting_name ? fixScriptName(test.scripting_name) : shortURL(test.url, true)}
+                          if test.status === 'completed' || test.status === 'failed'
+                            a(href=('/result/' + test.id) title=extras) #{test.scripting_name ? fixScriptName(test.scripting_name) : shortURL(test.url, true)}
                           else
                             span #{test.scripting_name ? fixScriptName(test.scripting_name) : shortURL(test.url, true)}
                       td

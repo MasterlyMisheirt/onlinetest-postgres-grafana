@@ -70,6 +70,3 @@ docker:
 queue:
   removeOnComplete: 50
   removeOnFail: 50
-
-sitespeed.io:
-  resultBaseURL: "http://127.0.0.1:3001"
