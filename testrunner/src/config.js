@@ -30,7 +30,6 @@ const ENV_LIST = [
   'redis_host',
   'redis_port',
   'redis_password',
-  'minio_password',
   'docker_extraparameters',
   'docker_container',
   'location_name',
@@ -82,11 +81,6 @@ function initConfig() {
         }
         case 'sitespeed.io_s3_removelocalresult': {
           object.key = 'sitespeed.io_s3_removeLocalResult';
-          break;
-        }
-        // Make sure the Minio password is passed on to sitespeed.io
-        case 'minio_password': {
-          object.key = 'sitespeed.io_s3_secret';
           break;
         }
       }
