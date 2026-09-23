@@ -52,7 +52,7 @@
         "spec": {
           "id": 11,
           "title": "Page status",
-          "description": "Latest run for this URL. Same PASS / WARNING / FAIL bands as CWV Group, using the selected iteration statistic.",
+          "description": "Latest run for this URL. ERROR when any metric is missing. Otherwise the same PASS / WARNING / FAIL bands as CWV Group, using the selected iteration statistic.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -72,7 +72,7 @@
                         "editorMode": "code",
                         "format": "table",
                         "rawQuery": true,
-                        "rawSql": "SELECT\n  CASE\n    WHEN COALESCE(lcp, 0) > 4000\n      OR COALESCE(fcp, 0) > 3000\n      OR COALESCE(cls, 0) > 0.25\n      OR COALESCE(ttfb, 0) > 1800\n      OR COALESCE(tbt, 0) > 600\n    THEN 0\n    WHEN COALESCE(lcp, 0) > 2500\n      OR COALESCE(fcp, 0) > 1800\n      OR COALESCE(cls, 0) > 0.1\n      OR COALESCE(ttfb, 0) > 800\n      OR COALESCE(tbt, 0) > 200\n    THEN 1\n    ELSE 2\n  END AS \"Status\"\nFROM (\n  SELECT\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'largestContentfulPaint'->> CASE '${stat:raw}' WHEN 'min' THEN 'min' WHEN 'mean' THEN 'mean' WHEN 'median' THEN 'median' WHEN 'p10' THEN 'p10' WHEN 'p90' THEN 'p90' WHEN 'p99' THEN 'p99' WHEN 'max' THEN 'max' ELSE 'median' END)::double precision AS lcp,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'firstContentfulPaint'->> CASE '${stat:raw}' WHEN 'min' THEN 'min' WHEN 'mean' THEN 'mean' WHEN 'median' THEN 'median' WHEN 'p10' THEN 'p10' WHEN 'p90' THEN 'p90' WHEN 'p99' THEN 'p99' WHEN 'max' THEN 'max' ELSE 'median' END)::double precision AS fcp,\n    (browsertime_result->0->'statistics'->'pageinfo'->'cumulativeLayoutShift'->> CASE '${stat:raw}' WHEN 'min' THEN 'min' WHEN 'mean' THEN 'mean' WHEN 'median' THEN 'median' WHEN 'p10' THEN 'p10' WHEN 'p90' THEN 'p90' WHEN 'p99' THEN 'p99' WHEN 'max' THEN 'max' ELSE 'median' END)::double precision AS cls,\n    (browsertime_result->0->'statistics'->'timings'->'ttfb'->> CASE '${stat:raw}' WHEN 'min' THEN 'min' WHEN 'mean' THEN 'mean' WHEN 'median' THEN 'median' WHEN 'p10' THEN 'p10' WHEN 'p90' THEN 'p90' WHEN 'p99' THEN 'p99' WHEN 'max' THEN 'max' ELSE 'median' END)::double precision AS ttfb,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'totalBlockingTime'->> CASE '${stat:raw}' WHEN 'min' THEN 'min' WHEN 'mean' THEN 'mean' WHEN 'median' THEN 'median' WHEN 'p10' THEN 'p10' WHEN 'p90' THEN 'p90' WHEN 'p99' THEN 'p99' WHEN 'max' THEN 'max' ELSE 'median' END)::double precision AS tbt\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date DESC NULLS LAST\n  LIMIT 1\n\n) scored\n"
+                        "rawSql": "SELECT\n  CASE\n    WHEN lcp IS NULL\n      OR fcp IS NULL\n      OR cls IS NULL\n      OR ttfb IS NULL\n      OR tbt IS NULL\n    THEN 3\n    WHEN lcp > 4000\n      OR fcp > 3000\n      OR cls > 0.25\n      OR ttfb > 1800\n      OR tbt > 600\n    THEN 0\n    WHEN lcp > 2500\n      OR fcp > 1800\n      OR cls > 0.1\n      OR ttfb > 800\n      OR tbt > 200\n    THEN 1\n    ELSE 2\n  END AS \"Status\"\nFROM (\n  SELECT\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'largestContentfulPaint'->> CASE '${stat:raw}' WHEN 'min' THEN 'min' WHEN 'mean' THEN 'mean' WHEN 'median' THEN 'median' WHEN 'p10' THEN 'p10' WHEN 'p90' THEN 'p90' WHEN 'p99' THEN 'p99' WHEN 'max' THEN 'max' ELSE 'median' END)::double precision AS lcp,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'firstContentfulPaint'->> CASE '${stat:raw}' WHEN 'min' THEN 'min' WHEN 'mean' THEN 'mean' WHEN 'median' THEN 'median' WHEN 'p10' THEN 'p10' WHEN 'p90' THEN 'p90' WHEN 'p99' THEN 'p99' WHEN 'max' THEN 'max' ELSE 'median' END)::double precision AS fcp,\n    (browsertime_result->0->'statistics'->'pageinfo'->'cumulativeLayoutShift'->> CASE '${stat:raw}' WHEN 'min' THEN 'min' WHEN 'mean' THEN 'mean' WHEN 'median' THEN 'median' WHEN 'p10' THEN 'p10' WHEN 'p90' THEN 'p90' WHEN 'p99' THEN 'p99' WHEN 'max' THEN 'max' ELSE 'median' END)::double precision AS cls,\n    (browsertime_result->0->'statistics'->'timings'->'ttfb'->> CASE '${stat:raw}' WHEN 'min' THEN 'min' WHEN 'mean' THEN 'mean' WHEN 'median' THEN 'median' WHEN 'p10' THEN 'p10' WHEN 'p90' THEN 'p90' WHEN 'p99' THEN 'p99' WHEN 'max' THEN 'max' ELSE 'median' END)::double precision AS ttfb,\n    (browsertime_result->0->'statistics'->'googleWebVitals'->'totalBlockingTime'->> CASE '${stat:raw}' WHEN 'min' THEN 'min' WHEN 'mean' THEN 'mean' WHEN 'median' THEN 'median' WHEN 'p10' THEN 'p10' WHEN 'p90' THEN 'p90' WHEN 'p99' THEN 'p99' WHEN 'max' THEN 'max' ELSE 'median' END)::double precision AS tbt\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n  ORDER BY run_date DESC NULLS LAST\n  LIMIT 1\n\n) scored\n"
                       }
                     },
                     "refId": "A",
@@ -128,6 +128,11 @@
                           "text": "PASS",
                           "color": "green",
                           "index": 2
+                        },
+                        "3": {
+                          "text": "ERROR",
+                          "color": "red",
+                          "index": 3
                         }
                       }
                     }
@@ -146,6 +151,10 @@
                       {
                         "value": 2,
                         "color": "green"
+                      },
+                      {
+                        "value": 3,
+                        "color": "red"
                       }
                     ]
                   },
@@ -222,6 +231,7 @@
                 "defaults": {
                   "unit": "suffix:ms",
                   "decimals": 0,
+                  "noValue": "N/A",
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -312,6 +322,7 @@
                 "defaults": {
                   "unit": "suffix:ms",
                   "decimals": 0,
+                  "noValue": "N/A",
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -402,6 +413,7 @@
                 "defaults": {
                   "unit": "none",
                   "decimals": 3,
+                  "noValue": "N/A",
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -492,6 +504,7 @@
                 "defaults": {
                   "unit": "suffix:ms",
                   "decimals": 0,
+                  "noValue": "N/A",
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -582,6 +595,7 @@
                 "defaults": {
                   "unit": "suffix:ms",
                   "decimals": 0,
+                  "noValue": "N/A",
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [

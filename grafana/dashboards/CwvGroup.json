@@ -52,7 +52,7 @@
         "spec": {
           "id": 16,
           "title": "Page performance results",
-          "description": "Lab metrics for pages in the selected group and device. FAIL / WARNING / PASS from LCP, FCP, CLS, TTFB and TBT.",
+          "description": "Lab metrics for pages in the selected group and device. ERROR when any metric is missing. Otherwise FAIL / WARNING / PASS from LCP, FCP, CLS, TTFB and TBT.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -72,7 +72,7 @@
                         "editorMode": "code",
                         "format": "table",
                         "rawQuery": true,
-                        "rawSql": "WITH latest AS (\n  SELECT DISTINCT ON (COALESCE(slug, ''), url)\n    url,\n    COALESCE(slug, '') AS slug,\n    label,\n    run_date,\n    lcp,\n    fcp,\n    cls,\n    ttfb,\n    tbt\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND (\n      '${testname:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n    )\n  ORDER BY COALESCE(slug, ''), url, run_date DESC NULLS LAST\n)\nSELECT\n  url,\n  CASE\n    WHEN label IS NOT NULL AND BTRIM(label) ~ '^https?://' THEN BTRIM(label)\n    ELSE NULL\n  END AS external_link,\n  run_date,\n  CASE\n    WHEN COALESCE(lcp, 0) > 4000\n      OR COALESCE(fcp, 0) > 3000\n      OR COALESCE(cls, 0) > 0.25\n      OR COALESCE(ttfb, 0) > 1800\n      OR COALESCE(tbt, 0) > 600\n    THEN 0\n    WHEN COALESCE(lcp, 0) > 2500\n      OR COALESCE(fcp, 0) > 1800\n      OR COALESCE(cls, 0) > 0.1\n      OR COALESCE(ttfb, 0) > 800\n      OR COALESCE(tbt, 0) > 200\n    THEN 1\n    ELSE 2\n  END AS status,\n  lcp AS lcp_ms,\n  fcp AS fcp_ms,\n  cls,\n  ttfb AS ttfb_ms,\n  tbt AS tbt_ms\nFROM latest\nORDER BY lcp DESC NULLS LAST\n"
+                        "rawSql": "WITH latest AS (\n  SELECT DISTINCT ON (COALESCE(slug, ''), url)\n    url,\n    COALESCE(slug, '') AS slug,\n    label,\n    run_date,\n    lcp,\n    fcp,\n    cls,\n    ttfb,\n    tbt\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND (\n      '${testname:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n    )\n  ORDER BY COALESCE(slug, ''), url, run_date DESC NULLS LAST\n)\nSELECT\n  url,\n  CASE\n    WHEN label IS NOT NULL AND BTRIM(label) ~ '^https?://' THEN BTRIM(label)\n    ELSE NULL\n  END AS external_link,\n  run_date,\n  CASE\n    WHEN lcp IS NULL\n      OR fcp IS NULL\n      OR cls IS NULL\n      OR ttfb IS NULL\n      OR tbt IS NULL\n    THEN 3\n    WHEN lcp > 4000\n      OR fcp > 3000\n      OR cls > 0.25\n      OR ttfb > 1800\n      OR tbt > 600\n    THEN 0\n    WHEN lcp > 2500\n      OR fcp > 1800\n      OR cls > 0.1\n      OR ttfb > 800\n      OR tbt > 200\n    THEN 1\n    ELSE 2\n  END AS status,\n  lcp AS lcp_ms,\n  fcp AS fcp_ms,\n  cls,\n  ttfb AS ttfb_ms,\n  tbt AS tbt_ms\nFROM latest\nORDER BY lcp DESC NULLS LAST\n"
                       }
                     },
                     "refId": "A",
@@ -239,6 +239,11 @@
                                 "color": "green",
                                 "index": 2,
                                 "text": "PASS"
+                              },
+                              "3": {
+                                "color": "red",
+                                "index": 3,
+                                "text": "ERROR"
                               }
                             },
                             "type": "value"
@@ -261,6 +266,10 @@
                       "options": "lcp_ms"
                     },
                     "properties": [
+                      {
+                        "id": "noValue",
+                        "value": "N/A"
+                      },
                       {
                         "id": "displayName",
                         "value": "LCP"
@@ -327,6 +336,10 @@
                     },
                     "properties": [
                       {
+                        "id": "noValue",
+                        "value": "N/A"
+                      },
+                      {
                         "id": "displayName",
                         "value": "FCP"
                       },
@@ -391,6 +404,10 @@
                       "options": "cls"
                     },
                     "properties": [
+                      {
+                        "id": "noValue",
+                        "value": "N/A"
+                      },
                       {
                         "id": "displayName",
                         "value": "CLS"
@@ -457,6 +474,10 @@
                     },
                     "properties": [
                       {
+                        "id": "noValue",
+                        "value": "N/A"
+                      },
+                      {
                         "id": "displayName",
                         "value": "TTFB"
                       },
@@ -521,6 +542,10 @@
                       "options": "tbt_ms"
                     },
                     "properties": [
+                      {
+                        "id": "noValue",
+                        "value": "N/A"
+                      },
                       {
                         "id": "displayName",
                         "value": "TBT"
@@ -1192,7 +1217,7 @@
         "spec": {
           "id": 7,
           "title": "Page status",
-          "description": "Pages scored PASS / WARNING / FAIL from each URL's median lab LCP, FCP, CLS, TTFB and TBT (same bands as Page performance results).",
+          "description": "Pages scored ERROR when any metric is missing, otherwise PASS / WARNING / FAIL from each URL's median lab LCP, FCP, CLS, TTFB and TBT (same bands as Page performance results).",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1212,7 +1237,7 @@
                         "editorMode": "code",
                         "format": "table",
                         "rawQuery": true,
-                        "rawSql": "WITH latest AS (\n  SELECT DISTINCT ON (COALESCE(slug, ''), url)\n    url,\n    COALESCE(slug, '') AS slug,\n    lcp,\n    fcp,\n    cls,\n    ttfb,\n    tbt\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND (\n      '${testname:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n    )\n  ORDER BY COALESCE(slug, ''), url, run_date DESC NULLS LAST\n)\nSELECT\n  COUNT(*) FILTER (WHERE status = 2) AS \"Passed\",\n  COUNT(*) FILTER (WHERE status = 1) AS \"Warning\",\n  COUNT(*) FILTER (WHERE status = 0) AS \"Failed\"\nFROM (\n  SELECT\n    CASE\n      WHEN COALESCE(lcp, 0) > 4000\n        OR COALESCE(fcp, 0) > 3000\n        OR COALESCE(cls, 0) > 0.25\n        OR COALESCE(ttfb, 0) > 1800\n        OR COALESCE(tbt, 0) > 600\n      THEN 0\n      WHEN COALESCE(lcp, 0) > 2500\n        OR COALESCE(fcp, 0) > 1800\n        OR COALESCE(cls, 0) > 0.1\n        OR COALESCE(ttfb, 0) > 800\n        OR COALESCE(tbt, 0) > 200\n      THEN 1\n      ELSE 2\n    END AS status\n  FROM latest\n) scored\n"
+                        "rawSql": "WITH latest AS (\n  SELECT DISTINCT ON (COALESCE(slug, ''), url)\n    url,\n    COALESCE(slug, '') AS slug,\n    lcp,\n    fcp,\n    cls,\n    ttfb,\n    tbt\n  FROM sitespeed_io_test_runs\n  WHERE browsertime_result IS NOT NULL\n    AND $__timeFilter(run_date)\n    AND (\n      ('${device:raw}' = 'desktop' AND test_type = 'desktop')\n      OR ('${device:raw}' = 'mobile' AND test_type = 'emulatedMobile')\n    )\n    AND (\n      '${group:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR COALESCE(NULLIF(BTRIM(slug), ''), 'default') = ANY (string_to_array(regexp_replace('${group:raw}', '[{}]', '', 'g'), ','))\n    )\n    AND (\n      '${testname:raw}' IN ('*', '{*}', '', 'All', '$__all')\n      OR url = ANY (string_to_array(regexp_replace('${testname:raw}', '[{}]', '', 'g'), ','))\n    )\n  ORDER BY COALESCE(slug, ''), url, run_date DESC NULLS LAST\n)\nSELECT\n  COUNT(*) FILTER (WHERE status = 2) AS \"Passed\",\n  COUNT(*) FILTER (WHERE status = 1) AS \"Warning\",\n  COUNT(*) FILTER (WHERE status = 0) AS \"Failed\",\n  COUNT(*) FILTER (WHERE status = 3) AS \"Error\"\nFROM (\n  SELECT\n    CASE\n      WHEN lcp IS NULL\n        OR fcp IS NULL\n        OR cls IS NULL\n        OR ttfb IS NULL\n        OR tbt IS NULL\n      THEN 3\n      WHEN lcp > 4000\n        OR fcp > 3000\n        OR cls > 0.25\n        OR ttfb > 1800\n        OR tbt > 600\n      THEN 0\n      WHEN lcp > 2500\n        OR fcp > 1800\n        OR cls > 0.1\n        OR ttfb > 800\n        OR tbt > 200\n      THEN 1\n      ELSE 2\n    END AS status\n  FROM latest\n) scored\n"
                       }
                     },
                     "refId": "A",
@@ -1296,6 +1321,21 @@
                         "id": "color",
                         "value": {
                           "fixedColor": "#EAB839",
+                          "mode": "fixed"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Error"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "fixedColor": "red",
                           "mode": "fixed"
                         }
                       }
